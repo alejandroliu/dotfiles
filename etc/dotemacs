@@ -1,0 +1,69 @@
+(add-to-list 'load-path "/home/alex/bin") ;;
+
+;; autoload visual-basic-mode
+(autoload 'visual-basic-mode "visual-basic-mode" "Visual Basic mode." t)
+(add-to-list 'auto-mode-alist '("\\.vbs\\'" . visual-basic-mode)) ;VBscript
+(add-to-list 'auto-mode-alist '("\\.vb\\'" . visual-basic-mode))  ;visual basic .NET file
+(add-to-list 'auto-mode-alist '("\\.bas\\'" . visual-basic-mode)) ;visual basic form
+(add-to-list 'auto-mode-alist '("\\.frm\\'" . visual-basic-mode)) ;basic language source
+(add-to-list 'auto-mode-alist '("\\.cls\\'" . visual-basic-mode)) ;C++ class definition file
+
+(autoload 'vala-mode "vala-mode" "Major mode for editing Vala code." t)
+(add-to-list 'auto-mode-alist '("\\.vala$" . vala-mode))
+(add-to-list 'auto-mode-alist '("\\.vapi$" . vala-mode))
+(add-to-list 'file-coding-system-alist '("\\.vala$" . utf-8))
+(add-to-list 'file-coding-system-alist '("\\.vapi$" . utf-8))
+
+(autoload 'markdown-mode "markdown-mode.el"
+  "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.md$" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.txt$" . markdown-mode))
+
+(require 'php-mode)
+
+(require 'fill-column-indicator)
+(setq-default fci-handle-line-move-visual nil)
+(setq-default fci-rule-column 80)
+(setq fci-rule-width 3)
+(setq fci-handle-truncate-lines nil)
+(add-hook 'after-change-major-mode-hook 'auto-fci-mode)
+(add-hook 'window-size-change-functions 'auto-fci-mode)
+
+(defun auto-fci-mode (&optional unused)
+  (if (> (frame-width) 80)
+      (fci-mode 1)
+    (fci-mode 0))
+)
+
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'markdown-mode-hook 'turn-on-auto-fill)
+
+(require 'whitespace)
+(setq whitespace-line-column 80)
+(setq whitespace-style '(face trailing lines-tail empty
+                space-before-tab indentation))
+(add-hook 'after-change-major-mode-hook 'whitespace-mode)
+
+(setq
+ backup-by-copying t      ; don't clobber symlinks
+ backup-directory-alist
+ '(("." . "/home/alex/.emacs.d/saves"))    ; don't litter my fs tree
+ delete-old-versions t
+ kept-new-versions 6
+ kept-old-versions 2
+ version-control t)       ; use versioned backups
+
+;; Show line-number in the mode line
+(line-number-mode 1)
+;; Show column-number in the mode line
+(column-number-mode 1)
+
+;; 
+;; Modernizing EMACS
+
+;; (cua-mode t)
+(transient-mark-mode 1) ;; No region when it is not highlighted
+(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+
+; (delete-selection-mode 1)
