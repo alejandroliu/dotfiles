@@ -1,3 +1,4 @@
+;; take a look at http://xenon.stanford.edu/~manku/emacs.html
 (add-to-list 'load-path "/home/alex/bin") ;;
 
 ;; autoload visual-basic-mode
