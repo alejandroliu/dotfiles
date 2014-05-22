@@ -25,7 +25,9 @@
   unstage = reset HEAD
   uncommit = reset --soft HEAD^
 
+
 [http]
 	sslVerify = false
+	proxy = http://10.47.142.30:8080/
 [push]
 	default = simple
