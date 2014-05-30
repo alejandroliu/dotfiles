@@ -1,5 +1,6 @@
 ;; take a look at http://xenon.stanford.edu/~manku/emacs.html
-(add-to-list 'load-path "/home/alex/bin") ;;
+(setq load-path (cons "~/emacs" load-path))
+(setq inhibit-startup-message t)
 
 ;; autoload visual-basic-mode
 (autoload 'visual-basic-mode "visual-basic-mode" "Visual Basic mode." t)
@@ -23,19 +24,19 @@
 
 (require 'php-mode)
 
-(require 'fill-column-indicator)
-(setq-default fci-handle-line-move-visual nil)
-(setq-default fci-rule-column 80)
-(setq fci-rule-width 3)
-(setq fci-handle-truncate-lines nil)
-(add-hook 'after-change-major-mode-hook 'auto-fci-mode)
-(add-hook 'window-size-change-functions 'auto-fci-mode)
+;;(require 'fill-column-indicator)
+;;(setq-default fci-handle-line-move-visual nil)
+;;(setq-default fci-rule-column 80)
+;;(setq fci-rule-width 3)
+;;(setq fci-handle-truncate-lines nil)
+;;(add-hook 'after-change-major-mode-hook 'auto-fci-mode)
+;;(add-hook 'window-size-change-functions 'auto-fci-mode)
 
-(defun auto-fci-mode (&optional unused)
-  (if (> (frame-width) 80)
-      (fci-mode 1)
-    (fci-mode 0))
-)
+;;(defun auto-fci-mode (&optional unused)
+;;  (if (> (frame-width) 80)
+;;      (fci-mode 1)
+;;    (fci-mode 0))
+;;)
 
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'markdown-mode-hook 'turn-on-auto-fill)
