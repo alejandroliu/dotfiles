@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # ~/.bashrc
 #
@@ -13,4 +14,15 @@ alias moer=more
 if [ -d $HOME/git/sandbox/mptcl ] ; then
   alias mpt='wish $HOME/git/sandbox/mptcl/d_mplayer.tcl'
   alias edl='wish $HOME/git/sandbox/mptcl/d_edl.tcl'
+fi
+
+if [ -z $LTPATH ] ; then
+  if [ -d $HOME/local/pkgs ] ; then
+    export LTPATH=$HOME/local/pkgs
+    export PATH=$PATH:$HOME/local/bin
+    if [ -d $HOME/local/man ] ; then
+      [ -z $MANPATH ] && MANPATH=$(manpath)
+      export MANPATH=$MANPATH:$HOME/local/man
+    fi
+  fi
 fi
