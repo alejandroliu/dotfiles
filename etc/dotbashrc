@@ -9,3 +9,8 @@ alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
 
 alias moer=more
+
+if [ -d $HOME/git/sandbox/mptcl ] ; then
+  alias mpt='wish $HOME/git/sandbox/mptcl/d_mplayer.tcl'
+  alias edl='wish $HOME/git/sandbox/mptcl/d_edl.tcl'
+fi
