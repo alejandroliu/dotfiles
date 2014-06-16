@@ -47,4 +47,15 @@ found are:
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see
     <http://www.gnu.org/licenses/>.
-	
+
+# NOTES
+
+- /tmp/emacs$(id -u)/<ID> : running?
+- emacs --daemon=<ID>
+- emacsclient -s <ID> [--no-wait]
+- emacsclient --eval "(kill-emacs)"
+- emacsclient --eval "(interactive) (save-some-buffers) (kill-emacs)"
+- Identifying emacs
+  - netstat --unix -lp : shows path and PID
+  - wmctrl -l -p : list windows and PID
+

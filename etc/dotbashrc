@@ -12,10 +12,46 @@ PS1='[\u@\h \W]\$ '
 alias moer=more
 alias mroe=more
 
-if [ -d $HOME/git/sandbox/mptcl ] ; then
-  alias mpt='wish $HOME/git/sandbox/mptcl/d_mplayer.tcl'
-  alias edl='wish $HOME/git/sandbox/mptcl/d_edl.tcl'
+
+if [ -d $HOME/git/fdistco/pkgs/mptcl ] ; then
+  alias mpt='wish $HOME/git/fdistco/pkgs/mptcl/d_mplayer.tcl'
+  alias edl='wish $HOME/git/fdistco/pkgs/mptcl/d_edl.tcl'
 fi
+
+alias mg=emacs
+emacs() {
+  if [ -z "$DISPLAY" ] ; then
+    command emacs "$@"
+    return $?
+  fi
+  local server=$DISPLAY userid=$(id -u)
+  local socket=/tmp/emacs$userid/$server
+
+  if [ ! -e $socket ] ; then
+    emacs --daemon=$server || return 1
+    local cnt=0
+    while [ ! -e $socket ]
+    do
+      if [ $cnt -gt 10 ] ; then
+	echo "Failed to start server"
+	command emacs "$@"
+	return $?
+      fi
+      cnt=$(expr $cnt + 1)
+      sleep 1
+    done
+  fi
+
+  local nw=-c
+  if type wmctrl >/dev/null 2>&1  ; then
+    if [ $(wmctrl -lx | grep 'emacs' | wc -l) -gt 0 ] ; then
+      nw=""
+      wmctrl -xa emacs
+    fi
+  fi
+  emacsclient -s $server $nw --no-wait "$@"
+  return $?
+}
 
 if [ -z $LTPATH ] ; then
   if [ -d $HOME/local/pkgs ] ; then
