@@ -1,6 +1,7 @@
 ;; take a look at http://xenon.stanford.edu/~manku/emacs.html
-(setq load-path (cons "~/emacs" load-path))
+(setq load-path (cons "~/.dotfiles/emacs-lib" load-path))
 (setq inhibit-startup-message t)
+
 
 ;; autoload visual-basic-mode
 (autoload 'visual-basic-mode "visual-basic-mode" "Visual Basic mode." t)
@@ -50,7 +51,7 @@
 (setq
  backup-by-copying t      ; don't clobber symlinks
  backup-directory-alist
- '(("." . "/home/alex/.emacs.d/saves"))    ; don't litter my fs tree
+ '(("." . "~/.emacs.d/saves"))    ; don't litter my fs tree
  delete-old-versions t
  kept-new-versions 6
  kept-old-versions 2
