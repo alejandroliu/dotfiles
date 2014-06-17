@@ -28,7 +28,7 @@ emacs() {
   local socket=/tmp/emacs$userid/$server
 
   if [ ! -e $socket ] ; then
-    emacs --daemon=$server || return 1
+    command emacs --daemon=$server || return 1
     local cnt=0
     while [ ! -e $socket ]
     do
