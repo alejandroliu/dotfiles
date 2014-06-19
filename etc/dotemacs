@@ -45,7 +45,7 @@
 (require 'whitespace)
 (setq whitespace-line-column 80)
 (setq whitespace-style '(face trailing lines-tail empty
-                space-before-tab indentation))
+			      space-before-tab indentation))
 (add-hook 'after-change-major-mode-hook 'whitespace-mode)
 
 (setq
@@ -62,7 +62,6 @@
 ;; Show column-number in the mode line
 (column-number-mode 1)
 
-;; 
 ;; Modernizing EMACS
 
 ;; (cua-mode t)
@@ -70,3 +69,11 @@
 (setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
 
 ; (delete-selection-mode 1)
+
+;----------------------------------------------------------------------
+; DEFT stuff
+(require 'deft)
+(setq deft-extension "txt")
+(setq deft-directory "~/notes/")
+(setq deft-text-mode 'markdown-mode)
+
