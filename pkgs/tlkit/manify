@@ -1,0 +1,369 @@
+#!/usr/bin/perl -w
+#
+# manify : man page generator
+#
+#   Copyright (C) 2007,2014 Alejandro Liu Ly
+#
+#   manify is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as
+#   published by the Free Software Foundation; either version 2 of 
+#   the License, or (at your option) any later version.
+#
+#   manify is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public
+#   License along with this program.  If not, see 
+#   <http://www.gnu.org/licenses/>
+#
+use strict;
+use warnings;
+
+use File::Basename;
+use File::Temp qw(tempfile tempdir);
+use Cwd qw(getcwd abs_path);
+use File::Find;
+
+#++
+# = MANIFY(1)
+# :Author:	A Liu Ly
+# :Revision:	2.0
+#
+# == NAME
+#
+# manify - extract manual pages from source file comments
+#
+# == SYNOPSIS
+#
+# *manify* ['options'] ['args']
+#
+# == DESCRIPTION
+#
+# *manify* converts comments in C, C++ and/or script languages to
+# ~UNIX~ style manual pages.
+#
+# Text in the comments is expected to be *AsciiDoc* format.
+#
+# Typically, *manify* would be integrated with *make(1)* scripts.
+#
+# The expected start-of-comment symbol is taken to be a line beginning
+# with one of the following:
+#
+#     #
+#     //
+#     *
+#
+# The required format of comments is discussed below, where SOC
+# stands for the start-of-comment symbol.
+#
+# 1. Start of manual: SOC, followed by '++'
+# 2. SOC followed by *AsciiDoc* documentation.
+# 3. End of manual: SOC, followed by '--'.
+#
+# The manual sections *NAME* and *SYNOPSIS* are mandatory.
+#
+# == MODES
+#
+# *--ext*::
+#    Extract man page.  This is the default.
+# *--view*::
+#    Preview man page.
+# *--asciidoc*::
+#    Extract *AsciiDoc* document.
+# *--genman*::
+#    Scan source directory and generate man pages.
+# *--query*::
+#    Query source and return manpage and section.
+#
+# == OPTIONS
+#
+# *--re=* re::
+#    Specified the regular expression to use for searching for comments
+# *--gzip=* yes|no::
+#    When in *genman* mode to `man` directory, files will be compressed.
+# *--outdir=* dir::
+#    manpages will be created in the *dir*.  If not specified it will
+#    default to the current directory.  If in *genman* mode, manpages
+#    will be created in the appropriate section directory.
+#
+# == LAYOUT
+#
+# The basic layout of a man page should look like this:
+#
+#    #++
+#    # = cmd(1)
+#    # :Revision:	x.y
+#    # ... other attributes ...
+#    #
+#    # == NAME
+#    #
+#    # cmd - one line description
+#    #
+#    # == SYNOPSIS
+#    #
+#    # *cmd* ['options'] 'args'
+#    #
+#    # == DESCRIPTION
+#    #
+#    # A textual description of the functioning of the command.
+#    #
+#    # == SEE ALSO
+#    #
+#    # List of related commands or functions (comma separated).
+#    #--
+#
+# NAME and SYNOPSIS are mandatory.
+#
+# NAME should contain the name of the
+# command or function, followed by a one-line description of what it does.
+#
+# SYNOPSIS, in the case of a command, a formal description of how to run
+# it and what command line options it takes. For program
+# functions, a list of the parameters the function takes and
+# which header file contains its definition.
+#
+# Other sections may be present, but these are not well standardized
+# across man pages. Common examples include:
+#
+# OPTIONS, EXIT STATUS, ENVIRONMENT, BUGS, FILES, AUTHOR, REPORTING,
+# EXAMPLES, BUGS, HISTORY and COPYRIGHT.
+#
+# === Common attributes
+#
+# Date::	File date
+# Author::	AsciiDoc author
+# Email::	Author E-mail address
+# Revision::	Version id
+# man manual::	Manual page (replaces the section heading)
+# man source::  Refers to the program or package
+#		(defaults to the source code file name)
+#
+# === Sections
+#
+# Common manual sections:
+#
+# 1::	General commands
+# 2::	System calls
+# 3::	Library functions, covering in particular the C standard library
+# 4::	Special files (usually devices, those found in /dev) and drivers
+# 5::	File formats and conventions
+# 6::	Games and screensavers
+# 7::	Miscellanea
+# 8::	System administration commands and daemons
+#
+# == REFERENCES
+#
+# * AsciiDoc Cheatsheet: http://powerman.name/doc/asciidoc
+# * Man page conventions: http://linux.die.net/man/7/man-pages
+#
+# == HISTORY
+#
+# This was based on an old script named *srctoman* by W.Z. Venema,
+# from 1986.  Later was implemented as a *tclsh* script in 2007
+# that implemented its own (very limited) wiki markup.
+#
+# == SEE ALSO
+#
+#    a2x(1), man(1)
+#
+#--
+my $re = "^\\s*([*#]|\\/\\/)\\s?";
+my @sect_titles = ('','User commands','System calls','Library functions',
+		   'Special files','File formats','Games','Miscellaneous',
+		   'System administration','Linux kernel');
+sub process_file {
+    my ($file,$re) = @_;
+
+    open(my $fh,'<',$file) || die "$file: $!\n";
+    #
+    # Search for beginning of man data
+    #
+    while (<$fh>) {
+	last if (/$re\+\+/);
+    }
+    die "$file: no embedded documentation\n" if (eof($fh));
+
+    my $txt = '';
+    my %attrs = ();
+
+    while (<$fh>) {
+	last if (/$re--/);
+	s/\s+$//;
+	if (s/$re//) {
+	    $txt .= $_."\n";
+	    if (/^\s*=\s+/ && /\((\d+)\)$/) {
+		my $sect = int($1);
+		my $mtime = (stat($file))[9];
+		my @lt = localtime($mtime);
+		$txt .= ":doctype:\tmanpage\n";
+		$txt .= sprintf(":Date:\t%04d-%02d-%02d\n",
+				$lt[5]+1900,$lt[4]+1,$lt[3]);
+		if ($sect_titles[$sect]) {
+		    $txt .= ":man manual:\t".$sect_titles[$sect]."\n";
+		}
+		$txt .= ":man source:\t".basename($file)."\n";
+		$attrs{sect} = $sect;
+		s/^\s*=\s+//;
+		s/\(\d+\)$//;
+		s/\s+$//;
+		s/^\s+//;
+		tr/A-Z/a-z/;
+		$attrs{name} = $_;
+
+	    }
+	}
+    }
+    close($fh);
+    return ($txt,\%attrs);
+}
+
+sub do_extract {
+    my ($file,$dir,$re) = @_;
+    my ($txt,$attrs) = process_file($file,$re);
+    die "$file: no manpage found\n" unless ($txt && $attrs->{name} && $attrs->{sect});
+    my $name = $attrs->{name};
+    my $sect = $attrs->{sect};
+
+    my ($fh,$tn) = tempfile();
+    print $fh $txt;
+    close($fh);
+    system('a2x','-D',$dir,'--format=manpage',$tn);
+    unlink($tn);
+    if (-f "$dir/$name.$sect") {
+	print STDERR "Created $dir/$name.$sect\n";
+    } else {
+	die "No output generated\n";
+    }
+    return "$dir/$name.$sect";
+}
+
+
+my $op = 'extract';
+my $outdir = '.';
+my $gzip = 1;
+
+while (scalar(@ARGV)) {
+    if ($ARGV[0] eq '--ext') {
+	$op = 'extract';
+    } elsif ($ARGV[0] eq '--view') {
+	$op = 'view';
+    } elsif ($ARGV[0] eq '--asciidoc') {
+	$op = 'asciidoc';
+    } elsif ($ARGV[0] eq '--genman') {
+	$op = 'genman';
+    } elsif ($ARGV[0] eq '--query') {
+	$op = 'query';
+    } elsif ($ARGV[0] eq '--help' || $ARGV[0] eq '-h') {
+	my ($txt,$attrs) = process_file($0,$re);
+	print $txt,"\n";
+	exit(0);
+    } elsif (substr($ARGV[0],0,5) eq '--re=') {
+	$re = substr($ARGV[0],5);
+	die "No RE specified with --re\n" if ($re eq '');
+    } elsif (substr($ARGV[0],0,7) eq '--gzip=') {
+	my $bool = substr($ARGV[0],7);
+	$bool =~ tr/A-Z/a-z/;
+	if ($bool eq 'yes' || $bool eq 'true' || $bool eq '1' ||$bool eq 'on') {
+	    $gzip = 1;
+	} elsif ($bool eq 'no'||$bool eq 'false'||$bool eq '0'||$bool eq 'off') {
+	    $gzip = 0;
+	} else {
+	    die "Invalid bool value $bool for --gzip\n";
+	}
+    } elsif (substr($ARGV[0],0,9) eq '--outdir=') {
+	$outdir = substr($ARGV[0],9);
+	die "No outputdir specified with --outdir\n" if ($outdir eq '');
+	die "$outdir: not found\n" unless (-d $outdir);
+    } else {
+	last;
+    }
+    shift;
+}
+
+sub wanted {
+    my $dir = $File::Find::dir;
+    my $f = $_;
+    my $fpath =$File::Find::name;
+    return if ($fpath =~ /\/\.svn\// ||
+	       $fpath =~ /\/\.git\//);
+    return if (/^\./ ||
+	       /~$/  ||
+	       /\.o$/ ||
+	       /^core$/ ||
+	       /\.rpm$/ ||
+	       /\.tar$/ ||
+	       /\.tar\.[^.]+$/);
+    return unless (-f $_);
+    my ($txt,$attrs) = eval { process_file($f,$re) };
+    return if ($@);
+    return unless ($txt && $attrs->{name} && $attrs->{sect});
+
+    if ($outdir eq '.') {
+	do_extract($f,$outdir,$re);
+    } else {
+	my $name = $attrs->{name};
+	my $sect = $attrs->{sect};
+	if (! -d "$outdir/man$sect") {
+	    mkdir("$outdir/man$sect") || die "mkdir($outdir/man$sect): $!\n";
+	}
+	my ($fh,$tn) = tempfile();
+	print $fh $txt;
+	close($fh);
+	system('a2x','-D',"$outdir/man$sect",'--format=manpage',$tn);
+	unlink($tn);
+	if (-f "$outdir/man$sect/$name.$sect" && $gzip) {
+	    if (-f "$outdir/man$sect/$name.$sec.gz") {
+		unlink("$outdir/man$sect/$name.$sec.gz");
+	    }
+	    system('gzip', "$outdir/man$sect/$name.$sect");
+	}
+    }
+}
+die "Nothing to process\nUse -h for help\n" if (scalar(@ARGV) == 0);
+
+if ($op eq 'extract') {
+    foreach my $f (@ARGV) {
+	my $f = do_extract($f,$outdir,$re);
+    }
+} elsif ($op eq 'view') {
+    die "Must specify files to view\n" if (scalar(@ARGV) == 0);
+    my $dir = tempdir(CLEANUP=>1);
+    foreach my $f (@ARGV) {
+	my $f = do_extract($f,$dir,$re);
+	if (-f $f) {
+	    system('man',$f);
+	}
+    }
+} elsif ($op eq 'asciidoc') {
+    die "Must specify files to convert\n" if (scalar(@ARGV) == 0);
+    foreach my $f (@ARGV) {
+	my ($txt,$attrs) = process_file($f,$re);
+	if ($txt && $attrs->{name} && $attrs->{sect}) {
+	    print $f,": ",$attrs->{name}," ",$attrs->{sect},"\n"
+		if (scalar(@ARGV) > 1);
+	    print $txt,"\n";
+	}
+    }
+} elsif ($op eq 'query') {
+    die "Must specify files to query\n" if (scalar(@ARGV) == 0);
+    foreach my $f (@ARGV) {
+	my ($txt,$attrs) = eval { process_file($f,$re) };
+	if ($@) {
+	    warn $@;
+	    next;
+	}
+	if ($txt && $attrs->{name} && $attrs->{sect}) {
+	    print $f,": ",$attrs->{name}," ",$attrs->{sect},"\n";
+	}
+    }
+} elsif ($op eq 'genman') {
+    my $cwd = getcwd();
+    if ($outdir ne '.') {
+	$outdir = abs_path($outdir);
+    }
+    find(\&wanted,@ARGV);
+} else {
+    die "Unknown op: $op\n";
+}

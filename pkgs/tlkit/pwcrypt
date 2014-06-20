@@ -1,0 +1,119 @@
+#!/usr/bin/perl -w
+#
+#   pwcrypt
+#   Copyright (C) 2007 Alejandro Liu Ly
+#
+#   This is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as
+#   published by the Free Software Foundation; either version 2 of 
+#   the License, or (at your option) any later version.
+#
+#   This software is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public
+#   License along with this program.  If not, see 
+#   <http://www.gnu.org/licenses/>
+#++
+# = pwcrypt(8)
+# :Revision: 1.0
+#
+# == NAME
+#
+# pwcrypt - Encrypt passwords using system database functions
+#
+# == SYNOPSIS
+#
+# *pwcrypt* _[options]_ _[passwd]_
+#
+# == DESCRIPTION
+#
+# *pwcrypt* is a function to encrypt passwords.  This passwords
+# are encrypted using the same functions as the system password
+# database.
+#
+# The intention is to use this to generate encrypted passwords
+# for installation scripts such as kickstart scripts.
+#
+# If no password is given on the command line, the program will
+# prompt for it from stdin.
+#
+# == OPTIONS
+#
+# *-0*::
+#	Use the old-fashioned UNIX DES crypt algorithm.
+# *-1|--md5*::
+#       Use MD5 encoded passwords.
+# *-5|--sha256*::
+#       Use SHA256 encoded passwords.
+# *-6|--sha512*::
+#       Use SHA512 encoded passwords.
+#
+# == AUTHOR
+#
+#    Alejandro Liu Ly
+#--
+#
+use strict;
+
+my $salt_keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
+
+my $mode = '$1$';	# Default to MD5
+my $salt_len = 8;
+my $passwd = undef;
+
+sub usage() {
+    die "Usage:\n\t$0 [-0|-1|-5|-6] [passwd]\n";
+}
+
+if (scalar(@ARGV)) {
+    if (substr($ARGV[0],0,1) eq '-') {
+	my $opt = shift;
+	if ($opt eq '-0') {
+	    $mode = '';		# Old fashioned descrypt passwds
+	    $salt_len = 2;
+	} elsif ($opt eq '-1' || $opt eq '--md5') {
+	    $mode = '$1$';
+	    $salt_len = 8;
+	} elsif ($opt eq '-5' || $opt eq '--sha256') {
+	    $mode = '$5$';
+	    $salt_len = 16;
+	} elsif ($opt eq '-6' || $opt eq '--sha512') {
+	    $mode = '$6$';
+	    $salt_len = 16;
+	} else {
+	    usage;
+	}
+    }
+    if (scalar(@ARGV) == 1) {
+	$passwd = shift;
+    } elsif (scalar(@ARGV) > 1) {
+	usage;
+    }
+}
+unless (defined($passwd)) {
+    system('stty -echo');
+    print 'Password: ';
+    chomp($passwd = <STDIN>);
+    my $pwd;
+    print "\nConfirm:  ";
+    chomp($pwd = <STDIN>);
+    print "\n";
+    system('stty echo');
+    if ($passwd ne $pwd) {
+	die "Passwords did not match\n";
+    }
+}
+
+### It is possible to do password quality checks
+
+my $salt = $mode;
+my $nkeys = length($salt_keys);
+
+for (my $i=0; $i < $salt_len; ++$i) {
+    $salt .= substr($salt_keys,int(rand($nkeys)),1);
+}
+
+print crypt($passwd,$salt),"\n";

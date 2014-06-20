@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# Handle sub-modules
+#
+cd $(dirname $0) || exit 1
+if [ -f $HOME/.reposrvs ] ; then
+  . $HOME/.reposrvs
+else
+  echo "Missing .reposrvs file" 1>&2
+fi
+
+repos="
+    pkgs/ashlib	https://github.com/alejandroliu/ashlib.git
+    pkgs/ecd	https://github.com/alejandroliu/ecd.git
+    pkgs/SimpleDeftNote https://github.com/alejandroliu/SimpleDeftNote.git
+    pkgs/markdown/parsedown https://github.com/erusev/parsedown.git
+    pkgs/markdown/markdownify https://github.com/Pixel418/Markdownify
+"
+
+check_repos() {
+    echo "$repos" | grep 'https:///' | while read a b c
+	do
+	  echo ERROR: $a, missing repo definition
+	done
+}
+
+check_ignore() {
+  if [ -f .gitignore ] ; then
+    if grep -q '^'$dir .gitignore ; then
+      return
+    fi
+  else
+    > .gitignore
+  fi
+  echo $dir >> .gitignore
+}
+
+current_branch() {
+  cd $1
+  branch_name=$(git symbolic-ref -q HEAD)
+  branch_name=${branch_name##refs/heads/}
+  branch_name=${branch_name:-HEAD}
+  echo $branch_name
+}
+
+
+op_exec() {
+  # Manage repos...
+  echo "$repos" | while read dir url branch
+  do
+    [ -z "$dir" ] && continue
+    echo -n "$dir: "
+    if [ ! -d $dir/.git ] ; then
+      echo "missing repo (use sync)"
+      continue
+    fi
+    echo ''
+    (cd $dir && git "$@")
+  done
+}
+op_sync() {
+  # Manage repos...
+  echo "$repos" | while read dir url branch
+  do
+    [ -z "$dir" ] && continue
+    check_ignore $dir
+    [ ! -d $(dirname $dir) ] && mkdir -pv $(dirname $dir)
+    [ ! -d $dir/.git ] && git clone $url $dir 
+    if [ -n "$branch" ] ; then
+      [ x"$(current_branch $dir)" != x"$branch" ] \
+	  && (cd $dir ; git checkout $branch)
+    fi
+    (cd $dir && git pull)
+  done
+}
+
+
+chk="$(check_repos)"
+if [ -n "$chk" ] ; then
+  echo "$chk"
+  exit 1
+fi
+
+if [ $# -eq 0 ] ; then
+  op_sync
+else
+  op="$1" ; shift
+  op_exec "$op"
+fi

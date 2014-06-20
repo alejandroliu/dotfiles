@@ -1,0 +1,340 @@
+#!/bin/sh
+#
+# lnpkg : a stow derivative
+#
+# (C) 2010,2014 Alejandro Liu Ly <alejandro_liu@hotmail.com>
+#
+# Manage installation software
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+op_usage() {
+sed s/^#// << EOT
+#++
+# = LNPKG(1)
+# :Revision: 2.0
+#
+# == NAME
+#
+# lnpkg - Manage installation software
+#
+# == SYNOPSIS
+#
+# *lnpkg* _[options]_ _action_ _[args]_
+#
+# == DESCRIPTION
+#
+# *lnpkg* is a program for managing the installation of software 
+# packages. It's a program between stow and lndir/cleanlinks.
+#
+# The approach used by ln_local (based on Stow) is to install each package
+# into its own tree, then use symbolic links to make it appear as though
+# the files are installed in the common tree.
+#
+# *lnpkg* recognises the actions:
+# *create* | *update* | *clean* | *info* | *delete* | *list*
+#
+# == ACTIONS
+#
+# *create* pkg_dir::
+#      Installs `pkg_dir` into the target directory.  `pkg_dir` should be
+#      a directory relative to the target directory or an absolute path.
+# *update* pkg_dir::
+#      install/update symlinks to `pkg_dir`.
+# *clean*::
+#      remove empty directories and broken symlinks in target directory.
+# *info* pkg_dir::
+#      Show info on a installed pkg `pkg_dir`.
+# *delete* pkg_dir::
+#      delete symlink to `pkg_dir`
+# *list* parent_pkg_dir::
+#       Show a list of installed packages.  If *-v* option is specified,
+#       it also lists the symlinks belonging to that pkg.
+#
+# == OPTIONS
+#
+# *-t|--target* _directory_::
+#    Defaults to the current directory.
+# *-n|--dry-run*::
+#    Just show what is going to happen.
+# *-v|--verbose*::
+#    Show the actions being executed
+#
+# == SAMPLE USAGE
+#
+# The standard way to use *lnpkg* is:
+#
+# - download source package
+# - build and install package
+#
+#    # extract archive
+#    tar zxvf archive-x.x.tar.gz
+#    cd archive-x.x
+#    # GNU autoconf
+#    ./configure --prefix="/pkgs/archive-x.x"
+#    make
+#    # Package installation
+#    make install
+#    # ... or ...
+#    make install DESTDIR=/pkgs/archive-x.x
+#
+# - create symlinks in /usr/local
+#
+#    cd /usr/local
+#    lnpkg -v create ../../pkgs/archive-x.x
+#
+# To remove an existing package:
+#
+#    cd /usr/local
+#    lnpkg delete ../../pkgs/archive-x.x
+#
+# To remove defintely a package:
+#
+#    rm -rf /pkgs/archive-x.x
+#    lnpkg --target=/usr/local clean
+#
+# == AUTHOR
+#
+# Alejandro Liu Ly
+#
+# == REFERENCES
+#
+# There are a number of packages that do similar things.  The main
+# attractiveness of this one is that it is a `/bin/sh` script intended
+# to have low dependancies.
+#
+# Other options:
+#
+# stow:: a perl program
+#    http://www.gnu.org/software/stow/
+# spill:: written C, so also has a low dependency count.
+#    http://www.rpcurnow.force9.co.uk/spill/
+# stash:: a package manager for non-root users (in perl)
+#    http://www.wyrick.org/source/perl/stash/
+# lt:: shell script by Marc Vertes.
+#     http://mvertes.free.fr/lt/lt
+#
+# I chose not to use *lt* because while written in `/bin/sh`, I wanted
+# a script that could use relative links instead of absolute links.
+#
+# == SEE ALSO
+#
+# ln(1), find(1)
+#
+#--
+EOT
+}
+
+fatal () {
+    echo "$@" 1>&2
+    exit 1
+}
+
+realpath() (
+  local lnkdir=$(dirname "$1")
+  local basename=$(basename "$1")
+  cd "$lnkdir" || return 1
+  local target=$(readlink $basename)
+  local tdir=$(dirname $target)
+  local tname=$(basename $target)
+  cd "$tdir" || return 1
+  echo $(pwd)/$tname
+  return 0
+)
+
+op_create() {
+  local srcdir
+  for srcdir in "$@"
+  do
+    [ ! -d "$srcdir" ] && fatal "$srcdir: does not exist"
+    srcdir=${1%/}
+    find $srcdir -type d -printf '%P\n' | (
+	while read d
+	do
+	  [ -z "$d" ] && continue
+	  [ ! -d "$srcdir/$d" ] && continue
+	  [ -d "./$d" ] && continue
+	  $do mkdir $v "$d"
+	done
+    )
+    find $srcdir ! -type d -printf '%P\n' | (
+	# Check if it is absolute or relative...
+	if [ x-"$(expr substr "$srcdir" 1 1)" = x-"/" ] ; then
+	  # Absolute!
+	  while read f
+	  do
+	    [ -z "$f" ] && continue
+	    [ ! -L "$srcdir/$f" -a -d "$srcdir/$f" ] && continue
+	    $do ln -s "$srcdir/$f" "$f"
+	  done
+	else
+	  # Relative!
+	  while read f
+	  do
+	    [ -z "$f" ] && continue
+	    [ ! -L "$srcdir/$f" -a -d "$srcdir/$f" ] && continue
+	    slashcount=$(tr -dc / <<<"$f" | wc -c)
+	    tlnk="$srcdir/$f"
+	    while [ $slashcount -gt 0 ] ; do
+	      tlnk="../$tlnk"
+	      slashcount=$(expr $slashcount - 1)
+	    done
+	    $do ln -s $v "$tlnk" "$f"
+	  done
+	fi
+    )
+  done
+}
+
+op_info() {
+  local srcdir
+  for srcdir in "$@"
+  do
+    if [ ! -d "$srcdir" ] ; then
+      echo $srcdir: missing
+      continue
+    fi
+    local pkgdir=$(cd "$srcdir" && pwd)
+    local pkgdir_l=$(expr length "$pkgdir/")
+
+    find . -type l -printf '%P\n' | ( while read l
+	do
+	  t=$(realpath "$l")
+	  if [ "$(expr substr "$t" 1 $pkgdir_l)" = "$pkgdir/" ] ; then
+	    expr substr "$t" $(expr $pkgdir_l + 1) $(expr length "$t")
+	  fi
+	done)
+  done
+}
+
+op_update() {
+  local srcdir
+  for srcdir in "$@"
+  do
+    [ ! -d "$srcdir" ] && fatal "$srcdir: does not exist"
+    op_info "$srcdir" | (
+	while read l
+	do
+	  [ -L $l ] && $do rm $v $l
+	done
+    )
+    op_create "$srcdir"
+  done
+}
+
+op_cleanup() {
+  # Remove invalid symlinks and empty dirs.
+  find . -depth -type l -printf '%P\n' | (
+    while read l
+    do
+      [ -e "$l" ] && continue
+      [ -z "$l" ] && continue
+      $do rm $v "$l"
+    done
+  )
+  find . -depth -type d -printf '%P\n' | (
+    while read dir
+    do
+      [ -z "$dir" ] && continue
+      subs=$(expr $(find "$dir" -maxdepth 1 | wc -l) - 1)
+      [ $subs -eq 0 ] && $do rmdir $v "$dir"
+    done
+  )
+}
+
+op_delete() {
+  # Delete installed packages
+  local srcdir
+  for srcdir in "$@"
+  do
+    [ ! -d "$srcdir" ] && fatal "$srcdir: does not exist"
+    op_info "$srcdir" | (
+	while read l
+	do
+	  [ -L $l ] && $do rm $v $l
+	done
+    )
+  done
+}
+
+op_list() {
+  local topdir="$1"
+  [ -z "$topdir" ] && fatal "No pkg parent dir specified"
+  [ ! -d "$topdir" ] && fatal "$topdir: does not exists"
+
+  local pkgdir=$(cd "$topdir" && pwd)
+  local pkgdir_l=$(expr length "$pkgdir/")
+
+  find . -type l -printf '%P\n' | (
+      while read l
+      do
+	t=$(realpath "$l")
+	if [ "$(expr substr "$t" 1 $pkgdir_l)" = "$pkgdir/" ] ; then
+	    expr substr "$t" $(expr $pkgdir_l + 1) $(expr length "$t") \
+		| tr '/ ' ' /' | ( read A B ; echo "$A" ) | tr '/ ' ' /'
+	fi
+      done
+  ) | sort -u | (
+      [ x"$v" != x"-v" ] && exec cat
+      while read pkg
+      do
+	op_info $topdir/$pkg | sed  "s/^/$pkg:/"
+      done
+  )
+}
+
+do=
+v=
+
+OPS=$(declare -F | grep '^declare -f op_' | sed 's/^declare -f op_//')
+
+while [ $# -gt 0 ]
+do
+  case "$1" in
+    --target=*)
+      [ -z "${1#--target=}" ] && fatal "No target specified"
+      cd "${1#--target=}" || exit 1
+      ;;
+    -t|--target)
+      [ -z "$2" ] && fatal "No target specified"
+      cd "$2" || exit 1
+      shift
+      ;;
+    -v|--verbose)
+      v=-v
+      ;;
+    -n|--dry-run)
+      v=
+      do=echo
+      ;;
+    *)
+      ACTION=
+      for try in $OPS
+      do
+	[ x"$try" != x"$1" ] && continue
+	ACTION="$try"
+	break
+      done
+      [ -z "$ACTION" ] && fatal "Unknown action: $1"
+      shift
+      break
+      ;;
+  esac
+  shift
+done
+
+[ -z "$ACTION" ] && fatal "No action specified.  Try 'usage'"
+
+op_$ACTION "$@"
