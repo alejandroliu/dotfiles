@@ -1,10 +1,6 @@
 #!/usr/bin/php 
 <?php
-$mode = "std";
-if (file_exists("LIBDIR/markdownEx.php")) {
-  # If we have markdownEx available we change default modes
-  $mode = "extra";
-}
+require_once(realpath(dirname(__FILE__)).'/parsedown/Parsedown.php');
 
 $verbose = 0;
 $view = 0;
@@ -12,16 +8,12 @@ $view = 0;
 array_shift($argv);	# Skip cmd name
 
 while (count($argv) > 0) {
-  if ($argv[0] == "--std") {
-    $mode = "std";
-  } else if ($argv[0] == "--view") {
+  if ($argv[0] == "--view") {
     $view = 1;
   } else if ($argv[0] == "-v" || $argv[0] == "--verbose") {
     $verbose=1;
   } else if ($argv[0] == "-q" || $argv[0] == "--quiet") {
     $verbose=0;
-  } else if ($argv[0] == "--extra") {
-    $mode = "extra";
   } else {
     break;
   }
@@ -39,10 +31,9 @@ function fileroot($filepath)
   return dirname($filepath)."/".$bname;
 }
 
-if ($mode == "extra") {
-  include_once "LIBDIR/markdownEx.php";
-} else {
-  include_once "LIBDIR/markdown.php";
+function Markdown($txt) {
+  $Parsedown = new Parsedown();
+  return $Parsedown->text($txt);
 }
 
 if (count($argv) == 0) {
@@ -66,5 +57,3 @@ if (count($argv) == 0) {
     }
   }
 }
-
-?>
