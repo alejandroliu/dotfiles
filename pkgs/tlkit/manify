@@ -314,8 +314,8 @@ sub wanted {
 	system('a2x','-D',"$outdir/man$sect",'--format=manpage',$tn);
 	unlink($tn);
 	if (-f "$outdir/man$sect/$name.$sect" && $gzip) {
-	    if (-f "$outdir/man$sect/$name.$sec.gz") {
-		unlink("$outdir/man$sect/$name.$sec.gz");
+	    if (-f "$outdir/man$sect/$name.$sect.gz") {
+		unlink("$outdir/man$sect/$name.$sect.gz");
 	    }
 	    system('gzip', "$outdir/man$sect/$name.$sect");
 	}
