@@ -12,10 +12,30 @@ PS1='[\u@\h \W]\$ '
 alias moer=more
 alias mroe=more
 
+export DOTS=$HOME/.dotfiles
 
-if [ -d $HOME/git/fdistco/pkgs/mptcl ] ; then
-  alias mpt='wish $HOME/git/fdistco/pkgs/mptcl/d_mplayer.tcl'
-  alias edl='wish $HOME/git/fdistco/pkgs/mptcl/d_edl.tcl'
+[ -d $DOTS/pkgs/ecd ] && . $DOTS/pkgs/ecd/cd.sh
+if [ -d $DOTS/pkgs/ashlib ] ; then
+  export ASHLIB=$DOTS/pkgs/ashlib
+  alias shdoc=$ASHLIB/shdoc
+  alias ashlib=$ASHLIB/ashlib
+  alias shlog=$ASHLIB/shlog
+fi
+
+if [ -d $DOTS/pkgs/mptcl ] ; then
+  alias mpt="wish $DOTS/pkgs/mptcl/d_mplayer.tcl"
+  alias edl="wish $DOTS/pkgs/mptcl/d_edl.tcl"
+fi
+
+[ -d $DOTS/pkgs/SimpleDeftNote ] \
+    && alias sdn="perl $DOTS/pkgs/SimpleDeftNote/sdn.pl"
+[ -d $DOTS/pkgs/markdown ] \
+    && alias markdown="php $DOTS/pkgs/markdown/markdown"
+if [ -d $DOTS/pkgs/tlkit ] ; then
+  alias lnpkg="$DOTS/pkgs/tlkit/lnpkg"
+  alias manify="$DOTS/pkgs/tlkit/manify"
+  alias perlmods="$DOTS/pkgs/tlkit/perlmods"
+  alias pwcrypt="$DOTS/pkgs/tlkit/pwcrypt"
 fi
 
 alias mg=emacs
@@ -53,13 +73,13 @@ emacs() {
   return $?
 }
 
-if [ -z $LTPATH ] ; then
-  if [ -d $HOME/local/pkgs ] ; then
-    export LTPATH=$HOME/local/pkgs
-    export PATH=$PATH:$HOME/local/bin
-    if [ -d $HOME/local/man ] ; then
-      [ -z $MANPATH ] && MANPATH=$(manpath)
-      export MANPATH=$MANPATH:$HOME/local/man
-    fi
-  fi
-fi
+#if [ -z $LTPATH ] ; then
+#  if [ -d $HOME/local/pkgs ] ; then
+#    export LTPATH=$HOME/local/pkgs
+#    export PATH=$PATH:$HOME/local/bin
+#    if [ -d $HOME/local/man ] ; then
+#      [ -z $MANPATH ] && MANPATH=$(manpath)
+#      export MANPATH=$MANPATH:$HOME/local/man
+#    fi
+#  fi
+#fi
