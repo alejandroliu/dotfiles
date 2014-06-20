@@ -21,7 +21,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 op_usage() {
-sed s/^#// << EOT
+sed s/^#// << 'EOT'
 #++
 # = LNPKG(1)
 # :Revision: 2.0

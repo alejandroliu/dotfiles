@@ -70,6 +70,14 @@
 
 ; (delete-selection-mode 1)
 
+;
+; Selective display
+;
+(defun jao-toggle-selective-display ()
+  (interactive)
+  (set-selective-display (if selective-display nil 1)))
+(global-set-key [f9] 'jao-toggle-selective-display)
+
 ;----------------------------------------------------------------------
 ; DEFT stuff
 (require 'deft)
