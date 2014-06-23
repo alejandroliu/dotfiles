@@ -31,4 +31,6 @@ The utilities provided are:
 	Inventorise installed perl modules
 - pwcrypt  
 	Encrypt passwords using system functions
-
+- mftx  
+	Similar in idea as `git-slave` but follows my personal
+	workflow better.

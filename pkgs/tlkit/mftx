@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+fatal() {
+  echo "$@" 1>&2
+  exit 1
+}
+
+manifest="$1" ; shift
+[ -z "$manifest" ] && fatal "No manifest specified"
+cd $(dirname $manifest) || exit 1
+
+[ ! -f $HOME/.reposrvs ] && fatal "Missing HOME/.reposrvs file"
+. $HOME/.reposrvs
+
+# Read in the repo file
+eval "repos=\"$(sed -e 's/#.*//' $manifest)\""
+
+check_repos() {
+    echo "$repos" | grep 'https:///' | while read a b c
+	do
+	  echo ERROR: $a, missing repo definition 1>&2
+	done
+}
+
+check_ignore() {
+  if [ -f .gitignore ] ; then
+    if grep -q '^'$dir .gitignore ; then
+      return
+    fi
+  else
+    > .gitignore
+  fi
+  echo $dir >> .gitignore
+}
+
+current_branch() {
+  cd $1
+  branch_name=$(git symbolic-ref -q HEAD)
+  branch_name=${branch_name##refs/heads/}
+  branch_name=${branch_name:-HEAD}
+  echo $branch_name
+}
+
+
+op_exec() {
+  # Manage repos...
+  echo "$repos" | while read dir url branch
+  do
+    [ -z "$dir" ] && continue
+    echo -n "$dir: "
+    if [ ! -d $dir/.git ] ; then
+      echo "missing repo (use sync)"
+      continue
+    fi
+    echo ''
+    (cd $dir && git "$@")
+  done
+}
+op_sync() {
+  # Manage repos...
+  echo "$repos" | while read dir url branch
+  do
+    [ -z "$dir" ] && continue
+    check_ignore $dir
+    [ ! -d $(dirname $dir) ] && mkdir -pv $(dirname $dir)
+    [ ! -d $dir/.git ] && git clone $url $dir 
+    if [ -n "$branch" ] ; then
+      [ x"$(current_branch $dir)" != x"$branch" ] \
+	  && (cd $dir ; git checkout $branch)
+    fi
+    (cd $dir && git pull)
+  done
+}
+
+
+chk="$(check_repos)"
+if [ -n "$chk" ] ; then
+  echo "$chk"
+  exit 1
+fi
+
+if [ $# -eq 0 ] ; then
+  op_sync
+else
+  op="$1" ; shift
+  op_exec "$op"
+fi
+
+
