@@ -15,28 +15,6 @@ alias mroe=more
 export DOTS=$HOME/.dotfiles
 
 [ -d $DOTS/pkgs/ecd ] && . $DOTS/pkgs/ecd/cd.sh
-if [ -d $DOTS/pkgs/ashlib ] ; then
-  export ASHLIB=$DOTS/pkgs/ashlib
-  alias shdoc=$ASHLIB/shdoc
-  alias ashlib=$ASHLIB/ashlib
-  alias shlog=$ASHLIB/shlog
-fi
-
-if [ -d $DOTS/pkgs/mptcl ] ; then
-  alias mpt="wish $DOTS/pkgs/mptcl/d_mplayer.tcl"
-  alias edl="wish $DOTS/pkgs/mptcl/d_edl.tcl"
-fi
-
-[ -d $DOTS/pkgs/SimpleDeftNote ] \
-    && alias sdn="perl $DOTS/pkgs/SimpleDeftNote/sdn.pl"
-[ -d $DOTS/pkgs/markdown ] \
-    && alias markdown="php $DOTS/pkgs/markdown/markdown"
-if [ -d $DOTS/pkgs/tlkit ] ; then
-  alias lnpkg="$DOTS/pkgs/tlkit/lnpkg"
-  alias manify="$DOTS/pkgs/tlkit/manify"
-  alias perlmods="$DOTS/pkgs/tlkit/perlmods"
-  alias pwcrypt="$DOTS/pkgs/tlkit/pwcrypt"
-fi
 
 alias mg=emacs
 emacs() {
@@ -72,6 +50,15 @@ emacs() {
   emacsclient -s $server $nw --no-wait "$@"
   return $?
 }
+
+if [ $HOSTNAME = dnla1959 ] ; then
+  # Some host specific stuff...
+  [ -d $DOTS/pkgs/SimpleDeftNote ] \
+    && alias sdn="( . ~/vars && perl $DOTS/pkgs/SimpleDeftNote/sdn.pl)"
+fi
+
+
+[ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
 
 #if [ -z $LTPATH ] ; then
 #  if [ -d $HOME/local/pkgs ] ; then

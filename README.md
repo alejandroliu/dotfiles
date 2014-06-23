@@ -50,6 +50,14 @@ found are:
 
 # NOTES
 
+- On dnla we should use the toyproxy?
+- figure out how to make mftx more general
+  - ./mftx is still a script with the #! line pointing to general
+    script
+
+
+* * *
+
 - /tmp/emacs$(id -u)/<ID> : running?
 - emacs --daemon=<ID>
 - emacsclient -s <ID> [--no-wait]

@@ -1,4 +1,4 @@
-#!/usr/bin/php 
+#!/usr/bin/php
 <?php
 require_once(realpath(dirname(__FILE__)).'/parsedown/Parsedown.php');
 
@@ -46,6 +46,9 @@ if (count($argv) == 0) {
   }
   foreach ($argv as $file) {
     $txt = file_get_contents($file);
+    if ($txt === false) {
+      die("Error opening $file\n");
+    }
     $html = Markdown($txt);
     $target = fileroot($file).".html";
     if ($verbose) {

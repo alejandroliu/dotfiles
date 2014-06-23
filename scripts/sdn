@@ -1,0 +1,3 @@
+#!/bin/sh
+pkgdir=$(cd $(dirname $0)/../pkgs && pwd)
+exec perl $pkgdir/SimpleDeftNote/sdn.pl "$@"
