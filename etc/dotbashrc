@@ -17,6 +17,7 @@ export DOTS=$HOME/.dotfiles
 [ -d $DOTS/pkgs/ecd ] && . $DOTS/pkgs/ecd/cd.sh
 
 alias mg=emacs
+alias deft='emacs --eval "(deft)"'
 emacs() {
   if [ -z "$DISPLAY" ] ; then
     command emacs "$@"
