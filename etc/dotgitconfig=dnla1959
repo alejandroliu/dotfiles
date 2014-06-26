@@ -28,6 +28,8 @@
 
 [http]
 	sslVerify = false
-	proxy = http://10.47.142.30:8080/
+	;proxy = http://10.47.142.30:8080/
+	proxy = http://10.0.2.2:9999/
+
 [push]
 	default = simple

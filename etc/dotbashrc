@@ -53,11 +53,11 @@ emacs() {
 }
 
 if [ $HOSTNAME = dnla1959 ] ; then
-  # Some host specific stuff...
-  [ -d $DOTS/pkgs/SimpleDeftNote ] \
-    && alias sdn="( . ~/vars && perl $DOTS/pkgs/SimpleDeftNote/sdn.pl)"
+  export proxy=http://10.0.2.2:9999/
+  export http_proxy=$proxy
+  export ftp_proxy=$proxy
+  export https_proxy=$proxy
 fi
-
 
 [ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
 
