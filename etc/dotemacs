@@ -78,6 +78,9 @@
   (set-selective-display (if selective-display nil 1)))
 (global-set-key [f9] 'jao-toggle-selective-display)
 
+(setq sh-basic-offset 2)
+(setq sh-indentation 2)
+
 ;----------------------------------------------------------------------
 ; DEFT stuff
 (require 'deft)
