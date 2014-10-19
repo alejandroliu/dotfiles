@@ -1,0 +1,234 @@
+#!/bin/sh
+#
+# Basic ANY to mp4 conversion
+#
+INPUT=()
+FILTERS=""
+FQ=''
+PRESET=slow # veryfast, fast, medium, slow
+CRF=23		# 23=default, 18-nearly lossless
+TEST=()
+ABR=128k
+CONCAT=no
+FFMPEG=(ffmpeg -y)
+PROFILE=baseline
+PIXFMT=''
+ACODEC=aac
+VCODEC=libx264
+EXT=mp4
+START=''
+
+fatal() {
+    echo "$@" 1>&2
+    exit 1
+}
+
+add_filter() {
+    FILTERS="$FILTERS$FQ$*"
+    FQ=","
+}
+
+in2out() {
+  local o=$(tr ' ' '_' <<<"$1"| sed -e 's/\.[^\.]*$//')
+  [ -z "$o" ] && return
+  echo "$o.$EXT"
+}
+
+
+add_input() {
+    INPUT+=( "$1" )
+    [ -n "$OUTPUT" ] && return
+    OUTPUT=$(in2out "$INPUT")
+    [ -z "$OUTPUT" ] && return
+    [ "$INPUT" = "$OUTPUT" ] && OUTPUT=""
+}
+
+
+load_mode() {
+  case "$1" in
+      aqua)
+	  PIXFMT="yuv420p"
+	  ABR="32k"
+	  ;;
+      ixus)
+	  PIXFMT="yuv420p"
+	  ABR="96k"
+	  ;;
+      iphone)
+	  add_filter scale=-1:576
+	  ;;
+      nexus)
+	  add_filter scale=-1:576
+	  ABR="96k"
+	  ;;
+      prep)
+	  add_filter scale=-1:640
+	  EXT=avi
+	  ACODEC=pcm_s16le
+	  VCODEC=mjpeg
+	  ABR="32k"
+	  ;;
+      *)
+	  fatal Unknown mode: "$1"
+	  ;;
+  esac
+}
+
+showhlp() {
+    cat <<-EOF
+	Modes:
+	    aqua : pixfmt=yuv420p abr=32k
+	    ixus : pixfmt=yuv420p abr=96k
+	    iphone : Normal iphone
+	    nexus : scale=-1:576 abr=96k
+	Options:
+	    --test, -t : test mode
+	EOF
+    exit 1
+}
+
+while [ $# -gt 0 ] ; do
+  case "$1" in
+      -h|--help)
+	  showhlp
+	  exit 0
+	  ;;
+      --mode=*)
+	  load_mode ${1#--mode=}
+	  ;;
+      --test|-t)
+	  TEST=(-t 3)
+	  ;;
+      --cat|--concat|-c)
+	  CONCAT=yes
+	  ;;
+      --no-profile)
+	  PROFILE=''
+	  ;;
+      --profile=*)
+	  PROFILE=${1#--profile=}
+	  ;;
+      --pixfmt=*)
+	  PIXFMT=${1#--pixfmt=}
+	  ;;
+      --test=*)
+	  TEST=(-t ${1#--test=})
+	  ;;
+      --start=*)
+	  START="-ss ${1#--start=}"
+	  ;;
+      --abr=*)
+	  ABR=${1#--abr=}
+	  ;;
+      --preset=*)
+	  PRESET=${1#--preset=}
+	  ;;
+      --crf=*)
+	  CRF=${1#--crf=}
+	  ;;
+      --rotate|-R)
+	  add_filter transpose=1
+	  ;;
+      --w576)
+	  add_filter scale=1024:576
+	  ;;
+      --576)
+	  add_filter scale=-1:576
+	  ;;
+      --w720)
+	  add_filter scale=1280:720
+	  ;;
+      --720)
+	  add_filter scale=-1:720
+	  ;;
+      --output=*)
+	  OUTPUT=${1#--output=}
+	  ;;
+      -o)
+	  OUTPUT="$2"
+	  shift
+	  ;;
+      *)
+	  add_input "$1"
+	  ;;
+  esac
+  shift
+done
+
+[ -z "${INPUT[*]}" ] && fatal "No input file (Use -h for help)"
+[ -z "$OUTPUT" ] && fatal "Must specify output file"
+
+CLEANUP=()
+trap '[ ${#CLEANUP[@]} -gt 0 ] && rm -f "${CLEANUP[@]}"' EXIT
+
+[ -n "$FILTERS" ] && CMDLINE+=( -vf "$FILTERS" )
+# Audio codec
+CMDLINE+=(
+    -strict -2
+    -acodec $ACODEC
+    -b:a $ABR
+)
+# Video settings
+CMDLINE+=(
+    -c:v $VCODEC
+    -preset $PRESET
+    -crf $CRF
+)
+
+# Extra flags
+#    -profile:v baseline
+[ -n "$PROFILE" ] && CMDLINE+=( -profile:v "$PROFILE" )
+[ -n "$PIXFMT" ] && CMDLINE+=( -pix_fmt "$PIXFMT" )
+
+CMDLINE+=(
+    -level 3.0
+    -movflags +faststart -tune zerolatency
+    -flags +aic+mv4
+)
+
+CMDLINE+=( "${TEST[@]}" )
+
+if [ ${#INPUT[@]} -eq 1 ] ; then 
+  set -x
+  command "${FFMPEG[@]}" \
+      $START \
+      -i "${INPUT[0]}" \
+      "${CMDLINE[@]}" \
+      "$OUTPUT"
+  touch --reference="${INPUT[0]}" "$OUTPUT"
+else
+  if [ $CONCAT = yes ] ; then
+    demux=$(mktemp)
+    CLEANUP+=( $demux )
+    (
+      for file in "${INPUT[@]}"
+      do
+	echo "file '$(cd $(dirname "$file") && pwd)/$(basename "$file")'"
+      done
+    ) > $demux
+    command "${FFMPEG[@]}" \
+      $START \
+	-f concat -i $demux \
+	"${CMDLINE[@]}" \
+	"$OUTPUT"
+    touch --reference="${INPUT[0]}" "$OUTPUT"
+  else
+    for INP in "${INPUT[@]}"
+    do
+      OUTPUT=$(in2out "$INP")
+      [ -z "$OUTPUT" ] && OUTPUT="$INP.$EXT"
+      [ "$INP" = "$OUTPUT" ] && OUTPUT="$INP.$EXT"
+      command "${FFMPEG[@]}" \
+	$START \
+	  -i "$INP" \
+	  "${CMDLINE[@]}" \
+	  "$OUTPUT"
+      [ $? -ne 0 ] && rm -f "$OUTPUT"
+      touch --reference="$INP" "$OUTPUT"
+    done
+  fi
+fi
+
+
+
+
