@@ -1,0 +1,54 @@
+#!/bin/sh
+######################################################################
+
+output=''
+
+while [ $# -gt 0 ] ; do
+  case "$1" in
+    -h|--help)
+      cat <<-EOF
+	Usage: $0 [opts] input files
+	  -o output | --output=output
+	    Specify output file
+	EOF
+	exit 0
+	;;
+    -o)
+      output="$2"
+      shift
+      ;;
+    --output=*)
+      output=${1#--output=}
+      ;;
+    -o*)
+      output=${1#-o}
+      ;;
+    *)
+      break
+      ;;
+  esac
+  shift
+done
+
+fatal() {
+  echo "$@" 1>&2
+  exit 1
+}
+
+[ -z "$output" ] && fatal "No output file specified"
+[ $# -lt 2 ] && fatal "Must specified at least two files"
+
+
+demux=$(mktemp)
+trap "rm -f $demux" EXIT
+(
+  for file in "$@"
+  do
+    echo "file '$(cd $(dirname "$file") && pwd)/$(basename "$file")'"
+  done
+) > $demux
+
+set -x
+exec ffmpeg -f concat -i $demux \
+  -c:v copy -c:a copy \
+  "$output"
