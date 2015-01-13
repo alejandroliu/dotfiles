@@ -9,6 +9,10 @@ My personal dotfile collection (yeah, a me too!)
     $HOME/.dotfiles/dfm install
 	$HOME/.dotfiles/dfm -x install
 
+To include packages:
+
+    $HOME/.dotfiles/mftx
+
 ## Usage
 
 Place/move your `dotfiles` in `$HOME/.dotfiles/etc`.  The following

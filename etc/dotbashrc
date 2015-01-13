@@ -5,6 +5,9 @@
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
+if [ -f /etc/bashrc ] ; then
+  . /etc/bashrc
+fi
 
 alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
@@ -71,3 +74,20 @@ fi
 #    fi
 #  fi
 #fi
+
+alt_browser() {
+  local alt="$1" ; shift
+  if [ -z "$alt" ] ; then
+    echo "No profile selected" 1>&2
+    return 1
+  fi
+  local alt_home=$HOME/.alt_home/$alt
+  if [ ! -d $alt_home ] ; then
+    mkdir -p $alt_home
+    chcon --reference=$HOME $alt_home
+  fi
+  type firefox || return 1
+  HOME=$alt_home firefox -no-remote "$@" &
+}
+alias xb="alt_browser xb"
+alias tryweb="alt_browser try"
