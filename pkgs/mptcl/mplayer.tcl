@@ -302,6 +302,13 @@ proc mptcl_MPLaunchPlayer {w} {
 	if {$data(-callback) == "" && $data(-seekbar) == ""} {
 	    lappend arglst "-quiet"
 	}
+	# Handle additional sub files...
+	set rr [file rootname $data(-file)]
+	set sub [glob -nocomplain "$rr.*.srt"]
+	if {$sub != ""} {
+	    set sub [lindex $sub 0]
+	    lappend arglst -sub $sub
+	}
 	lappend arglst $data(-file)
 	foreach cmd $mptcl_exe {
 	    if {![catch {open "|$cmd $arglst 2>@1" r+} fd]} {
