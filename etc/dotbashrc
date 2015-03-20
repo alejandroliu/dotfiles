@@ -15,6 +15,9 @@ PS1='[\u@\h \W]\$ '
 alias moer=more
 alias mroe=more
 
+alias pharx="phar extract -f"
+alias pharl="phar list -f"
+
 export DOTS=$HOME/.dotfiles
 
 [ -d $DOTS/pkgs/ecd ] && . $DOTS/pkgs/ecd/cd.sh
@@ -46,7 +49,7 @@ emacs() {
 
   local nw=-c
   if type wmctrl >/dev/null 2>&1  ; then
-    if [ $(wmctrl -lx | grep 'emacs' | wc -l) -gt 0 ] ; then
+    if [ $(wmctrl -lx | awk '$3 ~ "emacs" {print $3}' | wc -l) -gt 0 ] ; then
       nw=""
       wmctrl -xa emacs
     fi
@@ -54,6 +57,11 @@ emacs() {
   emacsclient -s $server $nw --no-wait "$@"
   return $?
 }
+
+# Kill emacs
+alias killemacs="emacsclient -s $DISPLAY --eval '(kill-emacs)'"
+alias shutdownemacs="emacsclient -s $DISPLAY --eval '(save-buffers-kill-emacs)'"
+
 
 if [ $HOSTNAME = dnla1959 ] ; then
   export proxy=http://10.0.2.2:9999/
