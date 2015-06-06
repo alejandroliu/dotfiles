@@ -130,7 +130,7 @@ proc mptcl_MPRemote {w args} {
 
     debug "CMD: $args"
     if {[lindex $args 0] == "-c"} {
-	catch { puts -nonewline $data(fid) [join [lreplace $args 0 0]} " "]
+	catch { puts -nonewline $data(fid) [join [lreplace $args 0 0] " "] }
     } else {
 	catch { puts $data(fid) [join $args " "]}
     }
@@ -291,6 +291,7 @@ proc mptcl_MPLaunchPlayer {w} {
     if {$data(fid) == ""} {
 	global mptcl_exe
 	set arglst [list \
+			-zoom \
 			-slave \
 			-wid $data(wid) \
 		       ]
@@ -332,7 +333,6 @@ proc mptcl_MPLaunchPlayer {w} {
     catch {unset data(pause)}
 }
 
-	
 proc mptcl_MPReadPipe {w} {
     #    pipe event handler
     # DESC
@@ -345,6 +345,7 @@ proc mptcl_MPReadPipe {w} {
 	mptcl_MPhandleline $w $line
     }
     if {[eof $data(fid)]} {
+	puts "EOF MPTCL REMOTE"
 	close $data(fid)
 
 	# Check if timers are running...
@@ -713,6 +714,11 @@ proc mptcl_MPCmd_mute {w {val {}}} {
     mptcl_MPRemote $w mute $val
 }
 
+proc mptcl_MPCmd_abort {w} {
+    $w stop
+    $w play
+}
+
 proc mptcl_MPCmd_volume {w {val {}} {abs {}}} {
     #    Volume control (widget sub-command)
     # ARGS
@@ -784,6 +790,7 @@ proc mplayer_bindings {w player} {
 
     bind $w <Key-o> [list mptcl_MPRemote $player osd_show_progression]
     bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
+    bind $w <Key-X> [list $player abort]
 }
 
 proc mptcl_scaleview {wi he mwi mhe} {

@@ -2,3 +2,4 @@ pkgs/ashlib
 pkgs/ecd
 pkgs/SimpleDeftNote
 pkgs/markdown/parsedown
+pkgs/php-mode

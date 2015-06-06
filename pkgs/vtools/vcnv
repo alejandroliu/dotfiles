@@ -57,6 +57,12 @@ define_val ext mp4 "ext : default output filename extension"
 define_bool concat no \
   "concatenate multiple files into a single file"
 
+define_val rottag "" \
+  "Sets the metadata rotate tag"
+opt_do_rottag() {
+  [ "$rottag" != "" ] && FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+}
+
 define_bool overwrite "yes" \
   "overwrite files without confirmation"
 opt_do_overwrite() {
@@ -258,7 +264,7 @@ transcode() (
 
 FFMPEG_CMD=( ffmpeg )
 FFMPEG_OPTS=()
-
+FFMPEG_TWEAK_OUT=()
 
 for f in $(declare -F | grep '^declare -f opt_do_' | cut -d' ' -f3)
 do
