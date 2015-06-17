@@ -1,0 +1,29 @@
+#!/bin/sh
+eval $(ashlib)
+pkgdir=$(dirname $ASHLIB)
+phpdoctor_dir=$pkgdir/phpdoctor
+myphpdoc_dir=$pkgdir/myphpdoc
+tmpini=$(mktemp)
+trap "rm -f $tmpini" EXIT
+
+if [ $# -gt 0 ] ; then
+  cfgin="$1"
+  shift
+else
+  if [ -n "$PHPDoctor" ] ; then
+    cfgin="$PHPDoctor"
+  elif [ -f $(pwd)/phpdoctor.ini ] ; then
+    cfgin=$(pwd)/phpdoctor.ini
+  else
+    fatal "Usage: $(basename $0) [config_file]"
+  fi
+fi
+php_code=""
+php_code="$php_code;define('PHPDOCTOR_DIR','$phpdoctor_dir');"
+php_code="$php_code;define('MYPHPDOC_DIR','$phpdoctor_dir');"
+php_code="$php_code;require_once('$cfgin');"
+php -r "$php_code" -- "$@" > $tmpini
+
+php_code=""
+php_code="$php_code;require_once('$phpdoctor_dir/phpdoc.php');"
+php -r "$php_code" -- $tmpini "$@"
