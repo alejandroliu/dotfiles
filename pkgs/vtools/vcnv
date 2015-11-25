@@ -128,8 +128,13 @@ opt_do_vfilter() {
   [ -n "$vfilters" ] && FFMPEG_OPTS+=( -vf "$vfilters" )
 }
 
+auto_tag=yes
 opt_bool_rotate() {
   opt_val_vfilter transpose=1
+  if [ $auto_tag = yes ] ;then
+    FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+    auto_tag=no
+  fi
 }
 opt_help_rotate() {
   echo "	--rotate : Rotate 90 degrees"
