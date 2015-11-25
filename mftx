@@ -6,3 +6,4 @@ pkgs/markdown/parsedown https://github.com/erusev/parsedown.git
 #pkgs/markdown/markdownify https://github.com/Pixel418/Markdownify
 pkgs/php-mode	https://github.com/ejmr/php-mode.git
 pkgs/phpdoctor   https://github.com/peej/phpdoctor.git
+pkgs/php-markdown https://github.com/michelf/php-markdown.git
