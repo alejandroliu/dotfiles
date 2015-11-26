@@ -1,8 +1,9 @@
 ;
 ; My main .emacs file...
 ;
-(load-library "my-cuaex")
+(load-library "custom-cua")
 (load-library "my-prefs")
+(load-library "load-modes")
 ;; http://www.emacswiki.org/emacs/CategoryDotEmacs
 ;; Loading files...
 ;; http://www.emacswiki.org/emacs/LoadPath

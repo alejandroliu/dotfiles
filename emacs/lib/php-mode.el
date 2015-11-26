@@ -1,0 +1,1 @@
+../../pkgs/php-mode/php-mode.el

@@ -3,12 +3,26 @@
 ;(setq frame-title-format "%b - emacs")
 (setq frame-title-format `(,"%b - (%f) emacs: ", (user-login-name) "@" ,(system-name)))
 
+;; Show line-number in the mode line
+(line-number-mode 1)
+;; Show column-number in the mode line
+(column-number-mode 1)
+
+
 ;
 ; Customize shell mode
 ;
 (setq sh-basic-offset 2)
 (setq sh-indentation 2)
 
+;
+; Enable display of whitespace
+;
+(require 'whitespace)
+;;(setq whitespace-line-column 80)
+(setq whitespace-style '(face trailing lines-tail empty
+			      space-before-tab indentation))
+(add-hook 'after-change-major-mode-hook 'whitespace-mode)
 
 ;
 ; Backup options
