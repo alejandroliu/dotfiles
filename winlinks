@@ -1,0 +1,19 @@
+#!/bin/sh
+cd $(cd $(dirname $0) && pwd) || exit 1
+
+git ls-files -s | awk '$1 == 120000 { print $4}' | (
+  while read file
+  do
+    [ -f $file ] || continue
+    (
+      cd $(dirname $file)
+      base="$(basename $file)"
+      target="$(cat "$base")"
+      [ -f "$target" ] || exit
+      echo "$target => $file"
+      cp -a "$target" "$base"
+      git update-index --assume-unchanged "$base"
+    )
+  done
+)
+

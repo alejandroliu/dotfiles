@@ -1,0 +1,139 @@
+#!/bin/sh
+#
+DFM_HOME=$(cd $(dirname $0) && pwd)
+dotdir=$DFM_HOME/etc
+sysname=$(uname -n)
+
+fatal() {
+  echo "$@" 1>&2
+  exit 1
+}
+
+verb() {
+  echo "$@" 1>&2
+}
+
+do_file_list() {
+  find $dotdir -maxdepth 1 -type f -printf '%P\n' | \
+      sed 's/=[^=]*$//' | sort -u | (
+      while read LN
+      do
+	src=$LN
+	dst=$(echo $LN | sed 's/^dot/./' | tr '^' '/' )
+	[ -f $dotdir/$src=$sysname ] && src="$src=$sysname"
+	echo $src:$dst
+      done
+  )
+}
+
+dotfile_status() {
+  local dotfile="$1" target="$2"
+  if [ ! -e "$HOME/$dotfile" ] ; then
+    echo "."
+    return
+  fi
+  local cur="$(cat $HOME/$dotfile)"
+  local new="$(cat $dotdir/$target)"
+  if [ x"$cur" = x"$new" ] ; then
+    echo "OK"
+    return
+  fi
+  echo "OLD"
+}
+
+do_install() {
+  do_file_list | (while read LN
+    do
+      local src=$(cut -d: -f1 <<<"$LN")
+      local dst=$(cut -d: -f2 <<<"$LN")
+      local cur=$(dotfile_status $dst $src)
+
+      case "$cur" in
+	OK)
+	  $verbose $dst skipping, OK
+	  ;;
+	.)
+	  $verbose copying $dst to $src
+	  $do cp -a $dotdir/$src $HOME/$dst
+	  ;;
+	file)
+	  verb Conflict file: $dst
+	  ;;
+	*)
+	  $verbose $dst updating to $src
+	  $do rm -f $HOME/$dst
+	  $do cp -a $dotdir/$src $HOME/$dst
+	  ;;
+      esac
+    done
+  )
+}
+
+
+do_help() {
+  cat <<-'EOF'
+	dfm - manages dot files
+
+	Usage:
+	    dfm [options] [cmd]
+
+	Commands:
+
+	    install	- install symlinks
+
+	Options:
+
+	    -v	- be verbose
+	    -x	- execute mode
+	EOF
+}
+do_status() {
+  do_file_list | (while read LN
+    do
+      local src=$(cut -d: -f1 <<<"$LN")
+      local dst=$(cut -d: -f2 <<<"$LN")
+      local cur=$(dotfile_status $dst $src)
+      echo $dst:$src:$cur
+    done
+  )
+}
+
+verbose=verb
+do=:
+while [ $# -gt 0 ]
+do
+  case "$1" in
+    -v)
+       verbose=verb
+       ;;
+    -q)
+       verbose=:
+       ;;
+    -x)
+       do=""
+       ;;
+     *)
+       break
+       ;;
+  esac
+  shift
+done
+
+[ -n "$do" ] && verbose=verb
+
+op="$1" ; shift || true
+case "$op" in
+  install)
+    do_install "$@"
+    exit $?
+    ;;
+  status)
+    do_status
+    exit $?
+    ;;
+  *)
+    do_help
+    exit $?
+    ;;
+esac
+exit 1

@@ -1,0 +1,9 @@
+[user]
+	name = Alejandro Liu
+	email = alejandro_liu@hotmail.com
+[https]
+	proxy = http://10.47.142.30:8080/
+[http]
+	proxy = http://10.47.142.30:8080/
+[push]
+	default = simple

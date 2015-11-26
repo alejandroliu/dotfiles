@@ -59,14 +59,6 @@
 			      space-before-tab indentation))
 (add-hook 'after-change-major-mode-hook 'whitespace-mode)
 
-(setq
- backup-by-copying t      ; don't clobber symlinks
- backup-directory-alist
- '(("." . "~/.emacs.d/saves"))    ; don't litter my fs tree
- delete-old-versions t
- kept-new-versions 6
- kept-old-versions 2
- version-control t)       ; use versioned backups
 
 ;; Show line-number in the mode line
 (line-number-mode 1)
@@ -81,16 +73,7 @@
 
 ; (delete-selection-mode 1)
 
-;
-; Selective display
-;
-(defun jao-toggle-selective-display ()
-  (interactive)
-  (set-selective-display (if selective-display nil 1)))
-(global-set-key [f9] 'jao-toggle-selective-display)
 
-(setq sh-basic-offset 2)
-(setq sh-indentation 2)
 
 ;----------------------------------------------------------------------
 ; DEFT stuff
@@ -99,3 +82,23 @@
 (setq deft-directory "~/notes/")
 (setq deft-text-mode 'markdown-mode)
 
+
+;----------------------------------------------------------------------
+(setq
+ backup-by-copying t      ; don't clobber symlinks
+ backup-directory-alist
+ '(("." . "~/.emacs.d/saves"))    ; don't litter my fs tree
+ delete-old-versions t
+ kept-new-versions 6
+ kept-old-versions 2
+ version-control t)       ; use versioned backups
+
+(setq sh-basic-offset 2)
+(setq sh-indentation 2)
+;
+; Selective display
+;
+(defun jao-toggle-selective-display ()
+  (interactive)
+  (set-selective-display (if selective-display nil 1)))
+(global-set-key [f9] 'jao-toggle-selective-display)
