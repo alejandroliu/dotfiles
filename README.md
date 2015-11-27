@@ -5,13 +5,9 @@ My personal dotfile collection (yeah, a me too!)
 
 ## Install
 
-    git clone https://github.com/alejandroliu/dotfiles.git $HOME/.dotfiles
+    git clone --recursive https://github.com/alejandroliu/dotfiles.git $HOME/.dotfiles
     $HOME/.dotfiles/dfm install
-	$HOME/.dotfiles/dfm -x install
-
-To include packages:
-
-    $HOME/.dotfiles/mftx
+    $HOME/.dotfiles/dfm -x install
 
 ## Usage
 

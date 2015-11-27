@@ -1,0 +1,24 @@
+[submodule "pkgs/php-markdown"]
+	path = pkgs/php-markdown
+	url = https://github.com/michelf/php-markdown.git
+[submodule "pkgs/ashlib"]
+	path = pkgs/ashlib
+	url = https://github.com/alejandroliu/ashlib.git
+[submodule "pkgs/ecd"]
+	path = pkgs/ecd
+	url = https://github.com/alejandroliu/ecd.git
+[submodule "pkgs/SimpleDeftNote"]
+	path = pkgs/SimpleDeftNote
+	url = https://github.com/alejandroliu/SimpleDeftNote.git
+[submodule "pkgs/markdown/parsedown"]
+	path = pkgs/markdown/parsedown
+	url = https://github.com/erusev/parsedown.git
+[submodule "pkgs/markdown/markdownify"]
+	path = pkgs/markdown/markdownify
+	url = https://github.com/Pixel418/Markdownify
+[submodule "pkgs/php-mode"]
+	path = pkgs/php-mode
+	url = https://github.com/ejmr/php-mode.git
+[submodule "pkgs/phpdoctor"]
+	path = pkgs/phpdoctor
+	url = https://github.com/peej/phpdoctor.git
