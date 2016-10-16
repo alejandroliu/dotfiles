@@ -3,7 +3,6 @@
 source mplayer.tcl
 #source console.tcl ; console show
 
-
 mplayer .f
 pack .f  -fill both -expand yes
 

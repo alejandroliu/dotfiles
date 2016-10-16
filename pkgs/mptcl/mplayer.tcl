@@ -29,6 +29,14 @@
 #
 package provide mplayer 0.4.1
 
+if {[catch {
+    source [file join [file dirname [file normalize [info script]]] quote.tcl]
+}]} {
+    namespace eval HCLS {
+	namespace eval quote {proc glob {x} { return $x }}
+    }
+}
+
 proc rem {args} {}
 interp alias {} debug {} puts
 
@@ -305,7 +313,8 @@ proc mptcl_MPLaunchPlayer {w} {
 	}
 	# Handle additional sub files...
 	set rr [file rootname $data(-file)]
-	set sub [glob -nocomplain "$rr.*.srt"]
+	set sub [glob -nocomplain "[HCLS::quote::glob $rr].*.srt"]
+	puts "RR=$rr SUB: $sub"
 	if {$sub != ""} {
 	    set sub [lindex $sub 0]
 	    lappend arglst -sub $sub
@@ -791,6 +800,9 @@ proc mplayer_bindings {w player} {
     bind $w <Key-o> [list mptcl_MPRemote $player osd_show_progression]
     bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
     bind $w <Key-X> [list $player abort]
+    bind $w <Key-s> [list mptcl_MPRemote $player sub_select]
+    bind $w <Key-S> [list mptcl_MPRemote $player sub_select -1]
+    bind $w <Key-l> [list mptcl_MPRemote $player switch_audio]
 }
 
 proc mptcl_scaleview {wi he mwi mhe} {
