@@ -87,6 +87,8 @@ use File::Find;
 #    manpages will be created in the *dir*.  If not specified it will
 #    default to the current directory.  If in *genman* mode, manpages
 #    will be created in the appropriate section directory.
+# *-D* _var=value_::
+#    Add a macro substitution value.
 #
 # == LAYOUT
 #
@@ -173,6 +175,7 @@ my $re = "^\\s*([*#]|\\/\\/)\\s?";
 my @sect_titles = ('','User commands','System calls','Library functions',
 		   'Special files','File formats','Games','Miscellaneous',
 		   'System administration','Linux kernel');
+my %macros = ();
 sub process_file {
     my ($file,$re) = @_;
 
@@ -216,7 +219,23 @@ sub process_file {
 	}
     }
     close($fh);
+    if (scalar(%macros)) {
+	my $regex = join '|', map quotemeta, keys %macros;
+	$txt =~ s/($regex)/$macros{$1}/g;
+	foreach my $k (keys %attrs) {
+	    $attrs{$k} =~ s/($regex)/$macros{$1}/g;
+	}
+    }
     return ($txt,\%attrs);
+}
+
+sub read_file {
+    my ($fn) = @_;
+    local $/=undef;
+    open(my $file,'<',$fn) || die("$fn: $!\n");
+    my $x = <$file>;
+    close $file;
+    return $x;
 }
 
 sub do_extract {
@@ -229,9 +248,22 @@ sub do_extract {
     my ($fh,$tn) = tempfile();
     print $fh $txt;
     close($fh);
-    system('a2x','-D',$dir,'--format=manpage',$tn);
+
+    my $tmpdir = File::Temp->newdir();
+    system('a2x','-D',$tmpdir,'--format=manpage',$tn);
     unlink($tn);
-    if (-f "$dir/$name.$sect") {
+    if (-f "$tmpdir/$name.$sect") {
+	# Compare the two files...
+	my $new  = read_file("$tmpdir/$name.$sect");
+	if (-f "$dir/$name.$sect") {
+	    my $orig = read_file("$dir/$name.$sect");
+	    if ($orig eq $new) {
+		return undef;
+	    }
+	}
+	open(my $out,'>',"$dir/$name.$sect") || die("$dir/$name.$sect: $!\n");
+	print $out $new;
+	close($out);
 	print STDERR "Created $dir/$name.$sect\n";
     } else {
 	die "No output generated\n";
@@ -262,6 +294,14 @@ while (scalar(@ARGV)) {
     } elsif (substr($ARGV[0],0,5) eq '--re=') {
 	$re = substr($ARGV[0],5);
 	die "No RE specified with --re\n" if ($re eq '');
+    } elsif (substr($ARGV[0],0,2) eq '-D') {
+	my ($l,$r) = split(/\s*=\s*/,substr($ARGV[0],2),2);
+	die "Must specify a variable with -D\n" unless ($l);
+	if ($r ) {
+	    $macros{$l} = $r;
+	} else {
+	    undef $macros{$l};
+	}
     } elsif (substr($ARGV[0],0,7) eq '--gzip=') {
 	my $bool = substr($ARGV[0],7);
 	$bool =~ tr/A-Z/a-z/;
