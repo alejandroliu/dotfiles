@@ -1,13 +1,17 @@
 ;;
 ;; Add the buffer "%b - emacs 
 ;(setq frame-title-format "%b - emacs")
-(setq frame-title-format `(,"%b - (%f) emacs: ", (user-login-name) "@" ,(system-name)))
+;(multiple-frames "%b" ("" invocation-name "@" system-name))
+;
+;(setq icon-title-format `(,"%b - (%f) 1emacs: ", (user-login-name) "@" ,(system-name)))
+(add-hook 'after-init-hook (lambda ()
+			     (setq frame-title-format `(,"%b - (%f) emacs: ", (user-login-name) "@" ,(system-name)))
+))
 
 ;; Show line-number in the mode line
 (line-number-mode 1)
 ;; Show column-number in the mode line
 (column-number-mode 1)
-
 
 ;
 ; Customize shell mode

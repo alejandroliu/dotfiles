@@ -33,9 +33,13 @@
 (require 'php-mode)
 (defun my-php-mode-setup ()
   (php-enable-psr2-coding-style)
+;;  (setq indent-tabs-mode t
+;;	c-basic-offset 3
+;;	tab-width 3))
+;;(add-hook 'php-mode-hook 'my-php-mode-setup)
   (setq indent-tabs-mode t
 	c-basic-offset 3
-	tab-width 3))
+	tab-width 8))
 (add-hook 'php-mode-hook 'my-php-mode-setup)
 
 ;----------------------------------------------------------------------

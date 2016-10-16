@@ -1,7 +1,7 @@
 ;
 ; My main .emacs file...
 ;
-(load-library "custom-cua")
+;(load-library "custom-cua")
 (load-library "my-prefs")
 (load-library "load-modes")
 ;; http://www.emacswiki.org/emacs/CategoryDotEmacs
