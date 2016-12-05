@@ -49,6 +49,6 @@ trap "rm -f $demux" EXIT
 ) > $demux
 
 set -x
-exec ffmpeg -f concat -i $demux \
+exec ffmpeg -f concat -safe 0 -i $demux \
   -c:v copy -c:a copy \
   "$output"

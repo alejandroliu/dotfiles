@@ -9,18 +9,20 @@ if [ -f /etc/bashrc ] ; then
   . /etc/bashrc
 fi
 
-alias ls='ls --color=auto'
 PS1='[\u@\h \W]\$ '
 
+alias ls='ls --color=auto'
 alias moer=more
 alias mroe=more
-
 alias pharx="phar extract -f"
 alias pharl="phar list -f"
 
 export DOTS=$HOME/.dotfiles
-
 [ -d $DOTS/pkgs/ecd ] && . $DOTS/pkgs/ecd/cd.sh
+[ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
+
+GEMDIR=$HOME/.gem/ruby/2.3.0/bin
+[ -d $GEMDIR ] && export PATH=$PATH:$GEMDIR
 
 alias mg=emacs
 alias deft='emacs --eval "(deft)"'
@@ -70,7 +72,6 @@ if [ $HOSTNAME = dnla1959 ] ; then
   export https_proxy=$proxy
 fi
 
-[ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
 
 #if [ -z $LTPATH ] ; then
 #  if [ -d $HOME/local/pkgs ] ; then
@@ -99,3 +100,6 @@ alt_browser() {
 }
 alias xb="alt_browser xb"
 alias tryweb="alt_browser try"
+
+# added by travis gem
+[ -f /home/alex/.travis/travis.sh ] && source /home/alex/.travis/travis.sh
