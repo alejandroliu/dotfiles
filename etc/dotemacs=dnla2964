@@ -1,4 +1,0 @@
-(add-to-list 'load-path "z:/ws/git/dotfiles/emacs/etc")
-(add-to-list 'load-path "z:/ws/git/dotfiles/emacs/lib")
-(add-to-list 'load-path "z:/ws/git/dotfiles/emacs-lib")
-(load-library "main")

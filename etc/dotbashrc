@@ -11,6 +11,11 @@ fi
 
 PS1='[\u@\h \W]\$ '
 
+
+# Bash checks the window size after each command and, if necessary,
+# updates the values of LINES and COLUMNS
+shopt -s checkwinsize
+
 alias ls='ls --color=auto'
 alias moer=more
 alias mroe=more
@@ -24,82 +29,11 @@ export DOTS=$HOME/.dotfiles
 GEMDIR=$HOME/.gem/ruby/2.3.0/bin
 [ -d $GEMDIR ] && export PATH=$PATH:$GEMDIR
 
-alias mg=emacs
-alias deft='emacs --eval "(deft)"'
-emacs() {
-  if [ -z "$DISPLAY" ] ; then
-    command emacs "$@"
-    return $?
-  fi
-  local server=$DISPLAY userid=$(id -u)
-  local socket=/tmp/emacs$userid/$server
-
-  if [ ! -e $socket ] ; then
-    command emacs --daemon=$server || return 1
-    local cnt=0
-    while [ ! -e $socket ]
-    do
-      if [ $cnt -gt 10 ] ; then
-	echo "Failed to start server"
-	command emacs "$@"
-	return $?
-      fi
-      cnt=$(expr $cnt + 1)
-      sleep 1
-    done
-  fi
-
-  local nw=-c
-  if type wmctrl >/dev/null 2>&1  ; then
-    if [ $(wmctrl -lx | awk '$3 ~ "emacs" {print $3}' | wc -l) -gt 0 ] ; then
-      nw=""
-      wmctrl -xa emacs
-    fi
-  fi
-  emacsclient -s $server $nw --no-wait "$@"
-  return $?
+mkdircd(){
+  mkdir "$1" && cd "$1"
 }
-
-# Kill emacs
-alias killemacs="emacsclient -s $DISPLAY --eval '(kill-emacs)'"
-alias shutdownemacs="emacsclient -s $DISPLAY --eval '(save-buffers-kill-emacs)'"
-
-
-if [ $HOSTNAME = dnla1959 ] ; then
-  export proxy=http://10.0.2.2:9999/
-  export http_proxy=$proxy
-  export ftp_proxy=$proxy
-  export https_proxy=$proxy
-fi
-
-
-#if [ -z $LTPATH ] ; then
-#  if [ -d $HOME/local/pkgs ] ; then
-#    export LTPATH=$HOME/local/pkgs
-#    export PATH=$PATH:$HOME/local/bin
-#    if [ -d $HOME/local/man ] ; then
-#      [ -z $MANPATH ] && MANPATH=$(manpath)
-#      export MANPATH=$MANPATH:$HOME/local/man
-#    fi
-#  fi
-#fi
-
-alt_browser() {
-  local alt="$1" ; shift
-  if [ -z "$alt" ] ; then
-    echo "No profile selected" 1>&2
-    return 1
-  fi
-  local alt_home=$HOME/.alt_home/$alt
-  if [ ! -d $alt_home ] ; then
-    mkdir -p $alt_home
-    chcon --reference=$HOME $alt_home
-  fi
-  type firefox || return 1
-  HOME=$alt_home firefox -no-remote "$@" &
-}
-alias xb="alt_browser xb"
-alias tryweb="alt_browser try"
 
 # added by travis gem
 [ -f /home/alex/.travis/travis.sh ] && source /home/alex/.travis/travis.sh
+[ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
+
