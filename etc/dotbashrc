@@ -17,6 +17,8 @@ PS1='[\u@\h \W]\$ '
 shopt -s checkwinsize
 
 alias ls='ls --color=auto'
+alias mv='mv -i'
+alias mv='cp -i'
 alias moer=more
 alias mroe=more
 alias pharx="phar extract -f"
