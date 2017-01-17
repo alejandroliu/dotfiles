@@ -7,9 +7,6 @@
 [submodule "pkgs/ecd"]
 	path = pkgs/ecd
 	url = https://github.com/alejandroliu/ecd.git
-[submodule "pkgs/SimpleDeftNote"]
-	path = pkgs/SimpleDeftNote
-	url = https://github.com/alejandroliu/SimpleDeftNote.git
 [submodule "pkgs/markdown/parsedown"]
 	path = pkgs/markdown/parsedown
 	url = https://github.com/erusev/parsedown.git
