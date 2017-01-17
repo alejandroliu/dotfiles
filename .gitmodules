@@ -1,6 +1,3 @@
-[submodule "pkgs/php-markdown"]
-	path = pkgs/php-markdown
-	url = https://github.com/michelf/php-markdown.git
 [submodule "pkgs/ashlib"]
 	path = pkgs/ashlib
 	url = https://github.com/alejandroliu/ashlib.git
@@ -16,6 +13,3 @@
 [submodule "pkgs/php-mode"]
 	path = pkgs/php-mode
 	url = https://github.com/ejmr/php-mode.git
-[submodule "pkgs/phpdoctor"]
-	path = pkgs/phpdoctor
-	url = https://github.com/peej/phpdoctor.git
