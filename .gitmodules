@@ -10,6 +10,3 @@
 [submodule "pkgs/markdown/markdownify"]
 	path = pkgs/markdown/markdownify
 	url = https://github.com/Pixel418/Markdownify
-[submodule "pkgs/php-mode"]
-	path = pkgs/php-mode
-	url = https://github.com/ejmr/php-mode.git
