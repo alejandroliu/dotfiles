@@ -37,5 +37,4 @@ mkdircd(){
 
 # added by travis gem
 [ -f /home/alex/.travis/travis.sh ] && source /home/alex/.travis/travis.sh
-[ -d $DOTS/scripts ] && export PATH=$PATH:$DOTS/scripts
 
