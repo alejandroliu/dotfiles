@@ -1,0 +1,3 @@
+#!/bin/sh
+srcdir=$(cd $(dirname $0)/../src && pwd)
+exec php $srcdir/vtools/lrc2srt.php "$@"
