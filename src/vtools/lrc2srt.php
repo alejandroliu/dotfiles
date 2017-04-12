@@ -56,7 +56,7 @@ foreach ($argv as $in) {
 	  return $a.'.00]'.$b;
 	},$out[0]);
     $out[1] = array_map(function ($n) { return $n.'.00'; },$out[1]);
-    print_r($out);
+    //print_r($out);
   }
 
   $srt = [];
