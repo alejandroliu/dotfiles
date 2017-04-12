@@ -48,7 +48,16 @@ foreach ($argv as $in) {
 
   
   $whole = "";
-  preg_match_all("/\[(\d{2}:\d{2}\.\d{2})\](.*)/", $get, $out);
+  $i= preg_match_all("/\[(\d{2}:\d{2}\.\d{2})\](.*)/", $get, $out);
+  if ($i == 0) {
+    $i = preg_match_all("/\[(\d{2}:\d{2})\](.*)/", $get, $out);
+    $out[0] = array_map(function ($n) {
+	  list($a,$b) = explode(']',$n,2);
+	  return $a.'.00]'.$b;
+	},$out[0]);
+    $out[1] = array_map(function ($n) { return $n.'.00'; },$out[1]);
+    print_r($out);
+  }
 
   $srt = [];
   foreach ($out[0] as $row) {
