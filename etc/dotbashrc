@@ -38,3 +38,6 @@ mkdircd(){
 # added by travis gem
 [ -f /home/alex/.travis/travis.sh ] && source /home/alex/.travis/travis.sh
 
+
+# added by travis gem
+[ -f /home/usr1/.travis/travis.sh ] && source /home/usr1/.travis/travis.sh

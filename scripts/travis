@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Auto Travis script
+#
+ruby_ver=$(ruby -e 'puts RUBY_VERSION')
+travis=$(find $HOME/.gem -name 'travis' -executable -type f)
+exec "$travis" "$@"
+
+
