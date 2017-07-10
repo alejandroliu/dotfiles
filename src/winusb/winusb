@@ -41,9 +41,23 @@ elif type 'mkfs.msdos' > /dev/null; then
 else
   die 48 'Error: mkdosfs or mkfs.msdos program not found!'
 fi
+if type grub-install >/dev/null 2>&1 ; then
+  echo 'Will use grub'
+elif type syslinux >/dev/null 2>&1 ; then
+  echo 'Will use syslinux'
+else
+  die 49 'No suitable boot loader found, install grub or syslinux'
+fi
+if type 7z >/dev/null 2>&1 ;then
+ p7z=7z
+elif type 7za >/dev/null 2>&1 ; then
+ p7z=7za
+else
+ die 13 "Missing command: 7z/7za"
+fi
 
 cmd=""
-for j in parted blockdev partprobe 7z blkid
+for j in parted blockdev partprobe blkid
 do
   type $j >/dev/null 2>&1 || cmd="$cmd $j"
 done
@@ -57,6 +71,8 @@ verbose=false
 
 
 #################################################################
+sudo_cmd=( "$0" "$@" )
+
 
 while [ ! "$#" -eq 0 ]; do
   case "$1" in
@@ -97,8 +113,8 @@ fi
 [ ! -b "$targetMedia" ] && die 96 "Error: the device "$targetMedia" is not special block!"
 
 if [ $(id -u) -ne 0 ]; then
-  exec sudo "$0" "$@"
-  die 39 "Exec failed!"
+  exec sudo "${sudo_cmd[@]}"
+  exit 1
 fi
 
 # Prepare install
@@ -168,7 +184,7 @@ cp -r "$isoMountPath/." "$partitionMountPath" || die 67 "Error copying files!"
 if ( grep -Eq "^MinServer=7[0-9]{3}\.[0-9]" "$isoMountPath/sources/cversion.ini") && [ -f "$isoMountPath/bootmgr.efi" ]; then
   # It's Windows 7 with EFI support (and thus 64-Bit)
   mkdir -p "$partitionMountPath/EFI/Boot"
-  7z e -so "$isoMountPath/sources/install.wim" "1/Windows/Boot/EFI/bootmgfw.efi" \
+  $p7z e -so "$isoMountPath/sources/install.wim" "1/Windows/Boot/EFI/bootmgfw.efi" \
     | dd of="$partitionMountPath/EFI/Boot/bootx64.efi"
 fi
 
