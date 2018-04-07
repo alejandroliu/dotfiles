@@ -32,7 +32,7 @@ package provide mpbrowser 0.1.0
 #
 # File type filter
 #
-foreach i {avi flv mkv mp4 mpg wmv mpeg mov} {
+foreach i {avi flv mkv mp4 mpg wmv mpeg mov webm} {
     set _mptcllib_mfilter(.$i) 1
 }
 unset i
