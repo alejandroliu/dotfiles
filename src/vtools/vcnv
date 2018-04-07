@@ -61,6 +61,7 @@ define_val rottag "" \
   "Sets the metadata rotate tag"
 opt_do_rottag() {
   [ "$rottag" != "" ] && FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+  auto_tag=no
 }
 
 define_bool overwrite "yes" \
@@ -132,7 +133,7 @@ auto_tag=yes
 opt_bool_rotate() {
   opt_val_vfilter transpose=1
   if [ $auto_tag = yes ] ;then
-    FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+    FFMPEG_OPTS+=( -metadata:s:v:0 rotate=0 )
     auto_tag=no
   fi
 }
@@ -145,6 +146,12 @@ opt_bool_sd() {
 }
 opt_help_sd() {
   echo "	--sd : Reduces HD video to SD"
+}
+opt_bool_ld() {
+  opt_val_vfilter scale=-1:288
+}
+opt_help_ld() {
+  echo "	--ld : Reduces HD video to Low Definition (for mobile players)"
 }
 
 ######################################################################
