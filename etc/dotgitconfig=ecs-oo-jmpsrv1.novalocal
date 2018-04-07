@@ -1,0 +1,31 @@
+[user]
+	name = A Liu Ly
+	email = AlejandroL@t-systems.com
+
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = auto
+
+[gc]
+  auto=1
+
+[merge]
+  summary=true
+
+[alias]
+  co = checkout
+  ci = commit
+  cp = cherry-pick -x
+  b = branch -v
+  r = remote -v
+  t = tag -l
+  unstage = reset HEAD
+  uncommit = reset --soft HEAD^
+
+[http]
+	sslVerify = false
+[push]
+	default = simple
