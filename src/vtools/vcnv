@@ -11,9 +11,12 @@ chmod u+x $temp
   done
   cat
 ) > $temp < $script
-exec $temp "$@"
-
+exec $temp --remove "$@"
 #-- CUT HERE--
+if [ x"$1" = "x--remove" ] ; then
+  rm -f $0
+  shift;
+fi
 
 ######################################################################
 
@@ -57,11 +60,19 @@ define_val ext mp4 "ext : default output filename extension"
 define_bool concat no \
   "concatenate multiple files into a single file"
 
-define_val rottag "" \
-  "Sets the metadata rotate tag"
 opt_do_rottag() {
   [ "$rottag" != "" ] && FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+}
+opt_val_rottag() {
+  rottag="$1"
   auto_tag=no
+}
+opt_no_rottag() {
+  rottag=""
+  auto_tag=no
+}
+opt_help_rottag() {
+  echo "	--rottag=Sets the metadata rotate tag"
 }
 
 define_bool overwrite "yes" \
@@ -132,10 +143,7 @@ opt_do_vfilter() {
 auto_tag=yes
 opt_bool_rotate() {
   opt_val_vfilter transpose=1
-  if [ $auto_tag = yes ] ;then
-    FFMPEG_OPTS+=( -metadata:s:v:0 rotate=0 )
-    auto_tag=no
-  fi
+  [ $auto_tag = yes ] && opt_val_rottag 0
 }
 opt_help_rotate() {
   echo "	--rotate : Rotate 90 degrees"
