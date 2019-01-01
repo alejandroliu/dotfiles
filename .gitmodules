@@ -1,9 +1,9 @@
 [submodule "pkgs/ashlib"]
 	path = pkgs/ashlib
-	url = https://github.com/alejandroliu/ashlib.git
+	url = https://github.com/TortugaLabs/ashlib.git
 [submodule "pkgs/ecd"]
 	path = pkgs/ecd
-	url = https://github.com/alejandroliu/ecd.git
+	url = https://github.com/TortugaLabs/ecd.git
 [submodule "pkgs/markdown/parsedown"]
 	path = pkgs/markdown/parsedown
 	url = https://github.com/erusev/parsedown.git
