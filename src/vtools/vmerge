@@ -1,0 +1,11 @@
+#!/bin/sh
+######################################################################
+
+if [ $# -ne 3 ] ; then
+  cat <<-EOF
+	Usage: $0 input-file1 input-file2 outputfile
+	EOF
+  exit 0
+fi
+
+exec ffmpeg -i "$1" -i "$2" -c:v copy -c:a copy "$3"
