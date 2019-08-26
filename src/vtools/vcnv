@@ -155,6 +155,12 @@ opt_bool_sd() {
 opt_help_sd() {
   echo "	--sd : Reduces HD video to SD"
 }
+opt_bool_sdp() {
+  opt_val_vfilter scale=-1:720
+}
+opt_help_sdp() {
+  echo "	--sdp : Scales to SD+ (720p)"
+}
 opt_bool_ld() {
   opt_val_vfilter scale=-1:288
 }
