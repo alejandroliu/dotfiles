@@ -171,6 +171,10 @@ do
 done
 
 [ -n "$do" ] && verbose=verb
+if [ $# -eq 0 ] ; then
+  do_help
+  exit 0
+fi
 
 op="$1" ; shift || true
 case "$op" in
