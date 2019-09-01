@@ -50,6 +50,26 @@ proc mptcl_shuffle { lst } {
     return $retval
 }
 
+proc mptcl_tcmp {dir a b} {
+  set ma [file mtime $a]
+  set mb [file mtime $b]
+  return [expr {($ma - $mb)*$dir}]
+}
+
+
+proc mptcl_tcmp1 {a b} {
+  return [mptcl_tcmp 1 $a $b]
+}
+proc mptcl_tcmp-1 {a b} {
+  return [mptcl_tcmp -1 $a $b]
+}
+
+# Sort files by mtime
+proc mptcl_tsort { lst {dir 1} } {
+  return [lsort -command mptcl_tcmp$dir $lst]
+}
+
+
 #
 # Process file items
 #

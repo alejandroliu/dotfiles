@@ -8,7 +8,7 @@ source [file join $scriptdir seekbar.tcl]
 
 proc main {args} {
     set flist [list]
-    set shuffle 0
+    set shuffle {}
     set max 0
     set classify {}
     set keep 0
@@ -17,7 +17,13 @@ proc main {args} {
 	switch -glob -- $item {
 	    --shuffle -
 	    -S {
-		set shuffle 1
+		set shuffle S
+	    }
+	    -t {
+		set shuffle t
+	    }
+	    -T {
+		set shuffle T
 	    }
 	    --keep -
 	    -K {
@@ -38,8 +44,16 @@ proc main {args} {
 	    }
 	}
     }
-    if {$shuffle} {
+    switch -- $shuffle {
+      S {
 	set flist [mptcl_shuffle $flist]
+      }
+      t {
+	set flist [mptcl_tsort $flist 1]
+      }
+      T {
+	set flist [mptcl_tsort $flist -1]
+      }
     }
     mbrowser . -files $flist -loop 0 -playing 0 -seekbar 1
 
