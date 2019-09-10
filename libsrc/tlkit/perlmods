@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+#
+#   perlmods
+#   Copyright (C) 2007 Alejandro Liu Ly
+#
+#   perlmods is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as
+#   published by the Free Software Foundation; either version 2 of 
+#   the License, or (at your option) any later version.
+#
+#   perlmods is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public
+#   License along with this program.  If not, see 
+#   <http://www.gnu.org/licenses/>
+#
+
+#++
+# = PERLMODS(1)
+# :Revision: 1.0
+#
+# == NAME
+#
+# perlmods - list installed perl modules
+#
+# == SYNOPSIS
+#
+# *perlmods* _[-s]_
+#
+# == DESCRIPTION
+#
+# *perlmods* generates a list of available perl modules
+#
+# == OPTIONS
+#
+# *-s*::
+#      Generate summary text.  This will omit modules where there is no
+#      *perldoc(1)* documentation.
+#
+# == AUTHOR
+#
+#    Alejandro Liu Ly
+#
+# == SEE ALSO
+#
+#    *perl(1)*, *perldoc(1)*
+#--
+#
+#
+use warnings;
+use strict;
+use File::Find;
+
+my $summary = 0;
+if (scalar(@ARGV) == 1 && $ARGV[0] eq '-s') {
+    shift;
+    $summary = 1;
+}
+
+if (scalar(@ARGV) != 0) {
+    die "Usage:\n\t$0 [-s]\n";
+}
+
+#
+# Trim the include directory path from the list
+#
+my @inc = ();
+foreach my $d (@INC) {
+    $d .= '/';
+    $d =~ s!/+!/!g;
+    if (-d $d) {
+	push @inc,$d;
+    }
+}
+#
+# Look for modules in all the include directories
+#
+my @files = ();
+find(sub {
+    push @files,$File::Find::name if (-f $File::Find::name && /\.pm$/)
+    }, @inc);
+  
+
+#
+# Try to come up with nicer names...
+#
+my %lst = ();
+foreach my $f (@files) {
+    my $file = $f;
+    $file =~ s!/+!/!g;
+    foreach my $d (@inc) {
+	my $l = length($d);
+	if (substr($file,0,$l) eq $d) {
+	    substr($file,0,$l) = '';
+	    last;
+	}
+    }
+    $file =~ s/\.pm$//;
+    $file =~ s!/!::!g;
+
+    $lst{$file} = $f;
+}
+
+
+#
+# Display list
+#
+if ($summary) {
+    # We redirect stderr to null...
+    open(STDERR,">",'/dev/null');
+
+    foreach my $file (sort keys %lst) {
+	if (open(my $fh,"-|",qw(perldoc -u -T),$file)) {
+	    my $hdrname = 0;
+	    while (<$fh>) {
+		s/^\s+//;
+		s/\s+$//;
+		if (/^=head1\s+NAME\s*$/) {
+		    $hdrname = 1;
+		    next;
+		} 
+		next unless ($hdrname);
+		if (s/^\s*$file\s+-\s+//) {
+		    print "$file\t-\t$_\n";
+		    last;
+		}
+	    }
+	    close($fh);
+	}
+    }
+} else {
+    print join("\n",sort keys %lst),"\n";
+}
+

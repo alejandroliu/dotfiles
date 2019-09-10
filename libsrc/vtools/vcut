@@ -1,0 +1,72 @@
+#!/bin/sh
+######################################################################
+
+output=''
+start=
+duration=
+
+while [ $# -gt 0 ] ; do
+  case "$1" in
+    -h|--help)
+      cat <<-EOF
+	Usage: $0 [opts] input
+	  -o output | --output=output
+	    Specify output file
+	  -s HH:MM:SS | --start=HH:MM:SS
+	    Skip to this position of file
+	  -d secs | --duration=secs
+	    Make clip this seconds long
+	EOF
+	exit 0
+	;;
+    -s)
+      start="-ss $2"
+      shift
+      ;;
+    --start=*)
+      start="-ss ${1#--start=}"
+      ;;
+    -s*)
+      start="-ss ${1#-s}"
+      ;;
+    -d)
+      duration="-t $2"
+      shift
+      ;;
+    --duration=*)
+      duration="-t ${1#--duration=}"
+      ;;
+    -d*)
+      duration="-t ${1#-d}"
+      ;;
+    -o)
+      output="$2"
+      shift
+      ;;
+    --output=*)
+      output=${1#--output=}
+      ;;
+    -o*)
+      output=${1#-o}
+      ;;
+    *)
+      break
+      ;;
+  esac
+  shift
+done
+
+fatal() {
+  echo "$@" 1>&2
+  exit 1
+}
+
+[ -z "$output" ] && fatal "No output file specified"
+[ $# -ne 1 ] && fatal "Must specify only ONE input file"
+[ -z "$start" -a -z "$duration" ] && fatal "Must specify --start and/or --duration"
+
+set -x
+exec ffmpeg $start -i "$1" \
+  -c:v copy -c:a copy \
+  $duration \
+  "$output"

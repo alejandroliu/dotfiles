@@ -1,0 +1,10 @@
+
+
+
+- mdoc to extract API like documentaqtion and feed to wikidoc 
+  <http://search.cpan.org/~dagolden/Pod-WikiDoc/> 
+  to generate output.
+  - mdoc only needed to extract TCL stuff
+  - formatting and conversion by WikiDoc
+- General usage document in Wikidoc format.
+

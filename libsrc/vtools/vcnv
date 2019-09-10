@@ -1,0 +1,330 @@
+#!/bin/sh
+script=$(cd $(dirname $0) ; pwd)/$(basename $0)
+temp=$(mktemp)
+chmod u+x $temp
+(
+  echo '#!/bin/sh'
+  echo "# rm -f $temp"
+  while read L
+  do
+    [ "$L" = "#-- CUT HERE--" ] && break
+  done
+  cat
+) > $temp < $script
+exec $temp --remove "$@"
+#-- CUT HERE--
+if [ x"$1" = "x--remove" ] ; then
+  rm -f $0
+  shift;
+fi
+
+######################################################################
+
+#
+define_val() {
+  local var="$1"
+  local default="$2"
+  local help_msg="$3"
+  eval ${var}=\"\$default\"
+  eval "opt_val_${var}() {
+	${var}=\"\$1\"
+	}"
+  eval "opt_help_${var}() {
+	echo '	--${var}=${help_msg}'
+	}"
+  eval "opt_no_${var}() {
+	${var}='$default'
+	}"
+}
+define_bool() {
+  local var="$1"
+  local default="$2"
+  local help_msg="$3"
+  eval ${var}=\"\$default\"
+  eval "opt_bool_${var}() {
+	${var}=yes
+	}"
+  eval "opt_help_${var}() {
+	echo '	--[no-]${var} : ${help_msg}'
+	}"
+  eval "opt_no_${var}() {
+	${var}=no
+	}"
+}
+######################################################################
+
+define_val output '' 'file : output file'
+
+define_val ext mp4 "ext : default output filename extension"
+
+define_bool concat no \
+  "concatenate multiple files into a single file"
+
+opt_do_rottag() {
+  [ "$rottag" != "" ] && FFMPEG_OPTS+=( -metadata:s:v:0 rotate=$rottag )
+}
+opt_val_rottag() {
+  rottag="$1"
+  auto_tag=no
+}
+opt_no_rottag() {
+  rottag=""
+  auto_tag=no
+}
+opt_help_rottag() {
+  echo "	--rottag=Sets the metadata rotate tag"
+}
+
+define_bool overwrite "yes" \
+  "overwrite files without confirmation"
+opt_do_overwrite() {
+  [ "$overwrite" = "yes" ] && FFMPEG_CMD+=( -y )
+}
+
+define_val start '' \
+  "hh:mm:ss[.xxx] : specify the start position for transcoding"
+opt_do_start() {
+  [ -n "$start" ] && FFMPEG_CMD+=( -ss "$start" )
+}
+
+define_val duration '' \
+  "seconds : duration of encoded clip"
+opt_do_length() {
+  [ -n "$duration" ] && FFMPEG_OPTS+=( -t "$duration" )
+}
+
+define_val pixfmt '' "pixfmt : Pixel format (eg yuv420p)"
+opt_do_pixfmt() {
+  [ -n "$pixfmt" ] && FFMPEG_OPTS+=( -pix_fmt $pixfmt )
+}
+
+
+define_val acodec 'aac' "codec : audio codec"
+opt_do_acodec() {
+  # AAC is labelled experimental so we need -strict -2)
+  [ "$acodec" = "aac" ] && FFMPEG_OPTS+=(-strict -2)
+  FFMPEG_OPTS+=( -acodec $acodec )
+}
+
+define_val abr '128k' "bps : audio bit rate"
+opt_do_abr() {
+  FFMPEG_OPTS+=( -b:a $abr )
+}
+
+define_val vcodec 'libx264' "codec : video codec"
+opt_do_vcodec() {
+  FFMPEG_OPTS+=( -c:v $vcodec )
+}
+
+define_val vopts \
+  "-preset slow -crf 23 -profile:v baseline -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  "flags : additional video flags"
+opt_do_vopts() {
+  FFMPEG_OPTS+=( $vopts )
+}
+
+vfilters=''
+vfilters_q=''
+opt_val_vfilter() {
+  vfilters+="$vfilters_q$1"
+  vfilters_q=,
+}
+opt_no_vfilter() {
+  vfilters=''
+  vfilters_q=''
+}
+opt_help_vfilter() {
+  echo "	--vfilter=filter : Add video filter"
+}
+opt_do_vfilter() {
+  [ -n "$vfilters" ] && FFMPEG_OPTS+=( -vf "$vfilters" )
+}
+
+auto_tag=yes
+opt_bool_rotate() {
+  opt_val_vfilter transpose=1
+  [ $auto_tag = yes ] && opt_val_rottag 0
+}
+opt_help_rotate() {
+  echo "	--rotate : Rotate 90 degrees"
+}
+
+opt_bool_sd() {
+  opt_val_vfilter scale=-1:576
+}
+opt_help_sd() {
+  echo "	--sd : Reduces HD video to SD"
+}
+opt_bool_sdp() {
+  opt_val_vfilter scale=-1:720
+}
+opt_help_sdp() {
+  echo "	--sdp : Scales to SD+ (720p)"
+}
+opt_bool_ld() {
+  opt_val_vfilter scale=-1:288
+}
+opt_help_ld() {
+  echo "	--ld : Reduces HD video to Low Definition (for mobile players)"
+}
+
+######################################################################
+
+opt_bool_preview() {
+  opt_val_ext avi
+  opt_no_vfilter
+  opt_val_vfilter scale=-1:480
+  opt_val_acodec pcm_s16le
+  opt_val_abr 32k
+  opt_val_vcodec mjpeg
+  opt_val_vopts ''
+}
+opt_help_preview() {
+  echo "	--preview : Preview mode"
+}
+
+opt_bool_aqua() {
+  opt_val_pixfmt 'yuv420p'
+  opt_va_abr '32k'
+}
+opt_help_aqua() {
+  echo "	--aqua : Old waterproof camera"
+}
+
+opt_bool_ixus() {
+  opt_val_pixfmt 'yuv420p'
+  opt_va_abr '96k'
+}
+opt_help_ixus() {
+  echo "	--ixus : Old Canon Ixus"
+}
+
+
+######################################################################
+
+opt_bool_help() {
+  echo "Usage:"
+  echo "    $0 [options] input files..."
+  for f in $(declare -F | grep '^declare -f opt_help_' | cut -d' ' -f3)
+  do
+    eval $f
+  done
+  exit
+}
+
+fatal() {
+    echo "$@" 1>&2
+    exit 1
+}
+
+chk_opt() {
+  type -t "$1" >/dev/null 2>&1
+  local rv=$?
+  [ $rv -ne 0 ] && fatal "Invalid option $2"
+  return $rv
+}
+
+input=()
+
+while [ $# -gt 0 ] ; do
+  case "$1" in
+    --no-*)
+      # Remove value
+      opt=${1#--no-}
+      chk_opt "opt_no_${opt}" $1
+      opt_no_${opt}
+      ;;
+    --*=*)
+      # Add value
+      opt=${1#--}
+      opt=${opt%%=*}
+      val=${1#--*=}
+      chk_opt "opt_val_${opt}" $1
+      opt_val_${opt} "$val"
+      ;;
+    --*)
+      # Boolean
+      opt=${1#--}
+      chk_opt "opt_bool_${opt}" $1
+      opt_bool_${opt}
+      ;;
+    *)
+      if [ -r "$1" ] ; then
+	input+=( "$1" )
+      else
+	fatal "Invalid option: $1"
+      fi
+  esac
+  shift
+done
+
+[ ${#input[@]} -eq 0 ] && fatal "No input files specified"
+
+in2out() {
+  local a="$1"
+  local b=$(sed -e 's/\.[^\.]*$//' <<<"$a")
+  [ -z "$b" ] && b=$a
+  n="$b.$ext"
+  while [ x"$n" = x"$a" ]
+  do
+    c=$(expr $c + 1)
+    n="$b-$c.$ext"
+  done
+  echo $n
+}
+
+transcode() (
+  set -x
+  command \
+    "${FFMPEG_CMD[@]}" \
+    -i "$1" \
+    "${FFMPEG_OPTS[@]}" \
+    "$2"
+  if [ $? -ne 0 ] ; then
+    rm -f "$2"
+    return 1
+  fi
+  [ ! -f "$2" ] && fatal "Unable to create file $2"
+  touch --reference="$1" "$2"
+)
+
+FFMPEG_CMD=( ffmpeg )
+FFMPEG_OPTS=()
+FFMPEG_TWEAK_OUT=()
+
+for f in $(declare -F | grep '^declare -f opt_do_' | cut -d' ' -f3)
+do
+  eval $f
+done
+
+if [ ${#input[@]} -eq 1 ] ; then
+  [ -z "$output" ] && output=$(in2out "${input[0]}")
+  transcode "${input[0]}" "$output"
+else
+  if [ $concat = yes ] ; then
+    demux=$(mktemp)
+    trap "rm -f $demux" EXIT
+    (
+      for file in "${input[@]}"
+      do
+	echo "file '$(cd $(dirname "$file") && pwd)/$(basename "$file")'"
+      done
+    ) >$demux
+    touch --reference="${input[0]}" "$demux"
+    FFMPEG_CMD+=( -f concat )
+    [ -z "$output" ] && output=$(in2out "${input[0]}")
+    transcode "$demux" "$output"
+  else
+    if [ -n "$output" ] ; then
+      mkdir -p "$output" || exit 1
+    fi
+    for infile in "${input[@]}"
+    do
+      outfile=$(in2out "$infile")
+      [ -n "$output" ] && outfile="$output/$outfile"
+      transcode "$infile" "$outfile"
+    done
+  fi
+fi
+
+exit
