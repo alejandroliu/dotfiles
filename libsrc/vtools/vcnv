@@ -112,6 +112,7 @@ opt_do_abr() {
 }
 
 define_val vcodec 'libx264' "codec : video codec"
+#~ define_val vcodec 'hevc' "codec : video codec"
 opt_do_vcodec() {
   FFMPEG_OPTS+=( -c:v $vcodec )
 }
@@ -119,6 +120,9 @@ opt_do_vcodec() {
 define_val vopts \
   "-preset slow -crf 23 -profile:v baseline -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
   "flags : additional video flags"
+#~ define_val vopts \
+  #~ "-preset slow -crf 28 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  #~ "flags : additional video flags"
 opt_do_vopts() {
   FFMPEG_OPTS+=( $vopts )
 }
