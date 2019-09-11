@@ -60,7 +60,8 @@ _prompt_command() {
     local s='s'
   fi
   local eop='\[\[\e[K\e[0m\]'
-  PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$clr$eop"
+  PS1="${clr}RV=$rv ($runtime sec$s) "'[\u@\h \W]\$ '"$reset"
+  #~ PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$clr$eop"
 
   if [ -n "$FIRST_PROMPT" ]; then
     unset FIRST_PROMPT
@@ -81,14 +82,13 @@ FIRST_PROMPT=true
 _start=$SECONDS
 trap '_pre_command "$BASH_COMMAND"' DEBUG
 PROMPT_COMMAND='_prompt_command'
-previous_command=""
 
 
 
 # Bash checks the window size after each command and, if necessary,
 # updates the values of LINES and COLUMNS
 shopt -s checkwinsize
-[ -d $$HOME/.dotfiles/libpkgs/ecd ] && . $HOME/.dotfiles/libpkgs/ecd/cd.sh
+[ -d $HOME/.dotfiles/libpkgs/ecd ] && . $HOME/.dotfiles/libpkgs/ecd/cd.sh
 [ -d $HOME/.bin ] && export PATH=$PATH:$HOME/.bin
 
 #
@@ -130,3 +130,6 @@ ge() {
   fi
   geany "$@" &
 }
+
+# We do this last, to keep things cleaner
+previous_command=""
