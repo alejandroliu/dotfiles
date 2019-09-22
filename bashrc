@@ -60,7 +60,9 @@ _prompt_command() {
     local s='s'
   fi
   local eop='\[\[\e[K\e[0m\]'
-  PS1="${clr}RV=$rv ($runtime sec$s) "'[\u@\h \W]\$ '"$reset"
+  printf '\033[0;97;44m\033[K\033[0m'
+  PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$reset"
+  #~ PS1="${clr}RV=$rv ($runtime sec$s) "'[\u@\h \W]\$ '"$reset"
   #~ PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$clr$eop"
 
   if [ -n "$FIRST_PROMPT" ]; then
