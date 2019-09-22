@@ -303,9 +303,14 @@ proc mptcl_MPLaunchPlayer {w} {
 			-slave \
 			-wid $data(wid) \
 		       ]
-	foreach cc {-vo -ao} {
+	foreach {cc evkey} {-vo MPT_VO -ao MPT_AO} {
 	    if {$data($cc) != ""} {
 		lappend arglst $cc $data($cc)
+	    } else {
+	      global env
+	      if {[info exists env($evkey)]} {
+		lappend arglst $cc $env($evkey)
+	      }
 	    }
 	}
 	if {$data(-callback) == "" && $data(-seekbar) == ""} {
