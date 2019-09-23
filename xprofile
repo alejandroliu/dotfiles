@@ -1,10 +1,19 @@
 #!/bin/sh
+
+# Configure keyboard... this is more suitable for my programming
+# lifestyle...
+setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+
+type xbindkeys && xbindkeys & # Configure HotKeys
+type xscreensaver && xscreensaver & # Run screen saver
+
+
 #geany &
 #exec > /tmp/errors.log 2>&1
 
-xbindkeys &
-(
-  sleep 500
-  xset dpms 1800 3600 7200
-  xset +dpms
-) &
+#xbindkeys &
+#(
+#  sleep 500
+#  xset dpms 1800 3600 7200
+#  xset +dpms
+#) &
