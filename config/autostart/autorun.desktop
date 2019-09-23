@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=MyAutoRun
+GenericName=My Auto Run script
+Comment=Simple Runner
+Exec=bash -c $HOME/.bin/autorun.sh
+Icon=geany
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=true
+Hidden=false
+X-GNOME-Autostart-enabled=true
+
