@@ -1,5 +1,5 @@
 {
-    "allow_postpone": false,
+    "allow_postpone": true,
     "long_break_duration": 60,
     "long_break_interval": 60,
     "long_breaks": [
@@ -8,6 +8,9 @@
         },
         {
             "name": "Lean back at your seat and relax"
+        },
+        {
+            "name": "Have some water"
         }
     ],
     "meta": {
@@ -101,9 +104,9 @@
         }
     ],
     "postpone_duration": 5,
-    "pre_break_warning_time": 10,
+    "pre_break_warning_time": 5,
     "rpc_port": 7200,
-    "short_break_duration": 20,
+    "short_break_duration": 15,
     "short_break_interval": 20,
     "short_breaks": [
         {
@@ -123,9 +126,6 @@
         },
         {
             "name": "Focus on a point in the far distance"
-        },
-        {
-            "name": "Have some water"
         }
     ],
     "shortcut_disable_time": 2,
