@@ -12,5 +12,7 @@ fi
 
 type safeeyes && safeeyes & # Run SafeEyes
 type redshift-gtk && redshift-gtk & # Red shift display
-#~ type owncloud && owncloud & # Sync NextCloud
+type owncloud && owncloud & # Sync NextCloud
+type parcellite && parcellite & # Clipboard manager
+type pidgin && pidgin & # local chat client
 
