@@ -4,6 +4,10 @@
 # lifestyle...
 setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 
+# Make sure this fonts are included...
+[ -d /usr/share/fonts/TTF ] && xset fp+ /usr/share/fonts/TTF
+[ -f $HOME/.Xdefaults ] && xrdb -merge $HOME/.Xdefaults
+
 type xbindkeys && xbindkeys & # Configure HotKeys
 type xscreensaver && xscreensaver & # Run screen saver
 
