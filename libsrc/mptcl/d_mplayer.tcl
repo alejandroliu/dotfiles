@@ -6,6 +6,15 @@ source [file join $scriptdir tk_getString.tcl]
 source [file join $scriptdir seekbar.tcl]
 # source [file join $scriptdir console.tcl] ; console show
 
+proc do_exit {} {
+    # Execute timers synchrnously...
+    foreach id [after info] {
+	foreach {task type} [after info $id] break
+	after cancel $id
+	eval $task
+    }
+}
+
 proc main {args} {
     set flist [list]
     set shuffle {}
@@ -65,7 +74,9 @@ proc main {args} {
     }
 
     bind . <Key> [list puts "Keysym is %K"]
-    bind . <<PlaylistEnd>> exit
+    bind . <<PlaylistEnd>> do_exit
+    bind . <Destroy> do_exit
+
 }
 
 

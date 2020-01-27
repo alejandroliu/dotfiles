@@ -36,7 +36,7 @@ foreach i {avi flv mkv mp4 mpg wmv mpeg mov webm} {
     set _mptcllib_mfilter(.$i) 1
 }
 unset i
-
+set _mptcllib_min_size 150
 #
 # Shuffle list
 #
@@ -82,7 +82,9 @@ proc mptcl_process {item list_ref} {
 	return
     }
     if {![file isfile $item]} return
-    global _mptcllib_mfilter
+    # Skip empty files...
+    global _mptcllib_mfilter _mptcllib_min_size
+    if {[file size $item] < $_mptcllib_min_size} return
     set ext [string tolower [file extension $item]]
     if {[info exists _mptcllib_mfilter($ext)]} {
 	lappend flist $item
@@ -344,17 +346,19 @@ proc mptcl_BrowserCmd_player {w args} {
 
 proc mptcl_mediastart {w} {
     upvar #0 $w data
-    set mwi [$data(player) width]
-    set mhe [$data(player) height]
+    catch {
+	set mwi [$data(player) width]
+	set mhe [$data(player) height]
 
-    if {[wm attributes . -fullscreen]} {
-	# Full screen... fit player to window
-	mptcl_fit_view $data(player) $data(w) $data(h)
-	mptcl_MPRemote $data(player) osd_show_property_text {${filename}}
-    } else {
-	# Windowed... fit window to player...
-	$data(player) config -width $mwi -height $mhe
-	wm geometry $w "${mwi}x${mhe}"
+	if {[wm attributes . -fullscreen]} {
+	    # Full screen... fit player to window
+	    mptcl_fit_view $data(player) $data(w) $data(h)
+	    mptcl_MPRemote $data(player) osd_show_property_text {${filename}}
+	} else {
+	    # Windowed... fit window to player...
+	    $data(player) config -width $mwi -height $mhe
+	    wm geometry $w "${mwi}x${mhe}"
+	}
     }
 }
 

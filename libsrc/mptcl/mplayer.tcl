@@ -160,22 +160,46 @@ proc mptcl_AbortTimers {w} {
 }
 
 
+proc stop_clean_up {victim} {
+    if {[file isdir "/proc/$victim"]} {
+	puts ">>> CLEANUP $victim <<<<"
+	exec sh -c "sleep 10 ; kill -9 $victim >/dev/null 2>&1" &
+	puts "YES KILL IT!"
+    }
+}
+
+
+# gets the stack up to the caller
+proc get_stack {} {
+    set result {}
+    for {set i [expr {[info level] -1}]} {$i >0} {incr i -1} {
+        lappend result [info level $i]
+    }
+    return $result
+}
 proc mptcl_MPCmd_stop {w} {
     #    stop playback (widget sub-command)
     # DESC
     #    Will stop playback and quit the running mplayer sub-process
     upvar #0 $w data
     if {$data(fid) == ""} return
+    parray data
     mptcl_MPRemote $w quit
+    set vic [pid $data(fid)]
     close $data(fid)
-
+    after 1000 [list stop_clean_up $vic]
     # check timers if they are running
     mptcl_AbortTimers $w
+    puts [after info]
+    foreach id [after info] {
+      puts "$id [after info $id]"
+    }
 
     catch {unset data(time_pos)}
     catch {unset data(pause)}
 
     set data(fid) ""
+    puts [get_stack]
 }
 
 proc mptcl_MPCmd_play {w} {
@@ -559,7 +583,7 @@ proc mptcl_MPLoadtout {w count} {
     _${w}_wcmd config -cursor "none"
     event generate $w <<MediaStart>>
     if {$data(-seekbar) != ""} {
-	$data(-seekbar) mediastart
+	catch { $data(-seekbar) mediastart }
     }
 }
     
