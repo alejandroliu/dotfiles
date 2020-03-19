@@ -9,7 +9,7 @@ setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 [ -f $HOME/.Xdefaults ] && xrdb -merge $HOME/.Xdefaults
 
 type xbindkeys && xbindkeys & # Configure HotKeys
-type xscreensaver && xscreensaver & # Run screen saver
+#~ type xscreensaver && xscreensaver & # Run screen saver
 
 
 #geany &
