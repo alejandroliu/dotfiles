@@ -1,8 +1,14 @@
 #!/bin/sh
 
+if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
+  IS_VNC=true
+else
+  IS_VNC=false
+fi
+
 # Configure keyboard... this is more suitable for my programming
 # lifestyle...
-setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+$IS_VNC || setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 
 # Make sure this fonts are included...
 [ -d /usr/share/fonts/TTF ] && xset fp+ /usr/share/fonts/TTF
