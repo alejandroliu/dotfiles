@@ -1,0 +1,26 @@
+#!/bin/sh
+
+disp=$(expr $(expr $(id -u) + 87) % 100)
+
+setsid Xvnc \
+	-geometry 1024x768 \
+	-depth 16 \
+	-pixelformat RGB565 \
+	-desktop "$(whoami)@$(hostname)" \
+	-Protocol3.3 \
+	-SecurityTypes None \
+	-localhost \
+	:$disp </dev/null >$HOME/.xvnc.log 2>&1 &
+
+
+sleep 1
+(
+  export DISPLAY=:$disp
+  # Mark X server as XVNC server
+  xprop -root -f XVNC 8i -set XVNC 1
+  #xprop -root XVNC
+
+  /etc/X11/Xsession mate-session &
+
+)
+
