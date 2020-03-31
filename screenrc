@@ -1,0 +1,17 @@
+#
+# Screen rc with my preferred options
+#
+escape ``
+#escape ^Gg
+
+# Addidional key bindings
+bind ^I other
+
+# defflow on|off|auto
+#  manage the default flow control state for new windows
+defflow off
+
+# startup_message on|off
+#  show or hide startup message
+startup_message off
+
