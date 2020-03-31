@@ -1,8 +1,8 @@
 !font settings
-xscreensaver.Dialog.headingFont:        -*-dejavu sans-bold-r-*-*-18-*-*-*-*-*-*-*
-xscreensaver.Dialog.bodyFont:           -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
-xscreensaver.Dialog.labelFont:          -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
-xscreensaver.Dialog.unameFont:          -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
-xscreensaver.Dialog.buttonFont:         -*-dejavu sans-bold-r-*-*-10-*-*-*-*-*-*-*
-xscreensaver.Dialog.dateFont:           -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
-xscreensaver.passwd.passwdFont:         -*-dejavu sans-bold-r-*-*-11-*-*-*-*-*-*-*
+!xscreensaver.Dialog.headingFont:        -*-dejavu sans-bold-r-*-*-18-*-*-*-*-*-*-*
+!xscreensaver.Dialog.bodyFont:           -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
+!xscreensaver.Dialog.labelFont:          -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
+!xscreensaver.Dialog.unameFont:          -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
+!xscreensaver.Dialog.buttonFont:         -*-dejavu sans-bold-r-*-*-10-*-*-*-*-*-*-*
+!xscreensaver.Dialog.dateFont:           -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
+!xscreensaver.passwd.passwdFont:         -*-dejavu sans-bold-r-*-*-11-*-*-*-*-*-*-*
