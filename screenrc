@@ -15,3 +15,11 @@ defflow off
 #  show or hide startup message
 startup_message off
 
+# Start windows from 1
+bind c screen 1
+bind ^c screen 1
+bind 0 select 10
+screen 1
+
+# Enable 256 colors
+term screen-256color

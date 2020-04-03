@@ -61,7 +61,12 @@ _prompt_command() {
   fi
   local eop='\[\[\e[K\e[0m\]'
   printf '\033[0;97;44m\033[K\033[0m'
-  PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$reset"
+  if [ -n "${WINDOW:-}" ] ; then
+    local w="[#${WINDOW}]:"
+  else
+    local w=""
+  fi
+  PS1="${clr}${w}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$reset"
   #~ PS1="${clr}RV=$rv ($runtime sec$s) "'[\u@\h \W]\$ '"$reset"
   #~ PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$clr$eop"
 
