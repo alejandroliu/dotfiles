@@ -39,25 +39,24 @@
 
 # Examples of commands:
 
-"xbindkeys_show" 
+"xbindkeys_show"
   control+shift + q
 
 # Increase volume
 "pactl set-sink-volume @DEFAULT_SINK@ +1000"
-   Mod4 + KP_Multiply
+  Mod4 + KP_Add
 
 # Decrease volume
 "pactl set-sink-volume @DEFAULT_SINK@ -1000"
-  Mod4 + KP_Subtract
-
+  Mod4 + KP_Enter
 
 # Mute volume
 "pactl set-sink-mute @DEFAULT_SINK@ toggle"
-   Mod4 + KP_Divide
+  Mod4 + KP_Subtract
 
 # Toggle audio output
-"patoggle"
-  Mod4 + KP_Add
+"patoggle2"
+  Mod4 + KP_Multiply
 
 # Lock screen
 "mate-screensaver-command -l"
