@@ -125,6 +125,10 @@ mkdircd(){
 
 ge() {
   if [ -z "$DISPLAY" ] ; then
+    if type ne ; then
+      ne "$@"
+      return $?
+    fi
     vi "$@"
     return $?
   fi
@@ -141,6 +145,13 @@ ge() {
     return 0
   fi
   geany "$@" &
+}
+
+screen() {
+  command screen "$@"
+  rc=$?
+  tput cup $(tput lines) 0 
+  return $rc
 }
 
 # We do this last, to keep things cleaner

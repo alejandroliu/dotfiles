@@ -7,9 +7,6 @@ escape ``
 # Addidional key bindings
 bind ^I other
 
-# defflow on|off|auto
-#  manage the default flow control state for new windows
-defflow off
 
 # startup_message on|off
 #  show or hide startup message
@@ -23,3 +20,9 @@ screen 1
 
 # Enable 256 colors
 term screen-256color
+
+# defflow on|off|auto
+#  manage the default flow control state for new windows
+defflow off
+
+	
