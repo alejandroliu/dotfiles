@@ -56,7 +56,7 @@
 
 # Toggle audio output
 "patoggle2"
-  Mod4 + KP_Multiply
+  Mod4 + KP_0
 
 # Lock screen
 "mate-screensaver-command -l"
