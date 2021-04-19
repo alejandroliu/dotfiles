@@ -20,7 +20,7 @@ if $IS_VNC ; then
   type safeeyes && safeeyes & # Run SafeEyes
   type redshift-gtk && redshift-gtk & # Red shift display
 fi
-type owncloud && owncloud & # Sync NextCloud
+#~ type owncloud && owncloud & # Sync NextCloud
 type parcellite && parcellite & # Clipboard manager
-type pidgin && pidgin & # local chat client
+#~ type pidgin && pidgin & # local chat client
 
