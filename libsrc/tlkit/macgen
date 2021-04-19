@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# tags:misc
+# target::/usr/local/bin/
+# mode:755
+#
+# Copyright (c) 2018 Alejandro Liu
+# Licensed under the MIT license:
+#
+# Permission is  hereby granted,  free of charge,  to any  person obtaining
+# a  copy  of  this  software   and  associated  documentation  files  (the
+# "Software"),  to  deal in  the  Software  without restriction,  including
+# without  limitation the  rights  to use,  copy,  modify, merge,  publish,
+# distribute, sublicense, and/or sell copies of the Software, and to permit
+# persons  to whom  the Software  is  furnished to  do so,  subject to  the
+# following conditions:
+#
+# The above copyright  notice and this permission notice  shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE  SOFTWARE  IS  PROVIDED  "AS  IS",  WITHOUT  WARRANTY  OF  ANY  KIND,
+# EXPRESS  OR IMPLIED,  INCLUDING  BUT  NOT LIMITED  TO  THE WARRANTIES  OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+# NO EVENT SHALL THE AUTHORS OR  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR  OTHER LIABILITY, WHETHER  IN AN  ACTION OF CONTRACT,  TORT OR
+# OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+# USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+#
+set -euf -o pipefail
+
+# Select from: http://standards-oui.ieee.org/oui/oui.txt
+# Random OUI
+oui_random="44:d2:ca"
+oui_prefix="b8:78:79"
+oui_changed="d8:60:b0"
+
+random_hex() {
+  echo $(od -An -N1 -t x1 /dev/urandom)
+}
+
+m_macaddr() {
+  echo ${1}:$(random_hex):$(random_hex):$(random_hex)
+}
+
+m_uuidgen() {
+  cat /proc/sys/kernel/random/uuid
+  #uuidgen
+}  
+
+usage() {
+  cat <<-_EOF_
+	Usage: $0 [options] [prefix]
+
+	Options:
+
+	-h, --help: This list
+	-1 : Use the random unused OUI
+	-2 : (Roche Diagnostics GmbH OUI)
+	-3 : changed OUI (bioMÃ©rieux Italia S.p.A.)
+	--mac: Generate a single random mac
+	--uuid|-u : Generate uuid
+	Prefix: xx:xx:xx
+	    Generate a mac address with the given prefix.
+	_EOF_
+  exit 0
+}
+
+prefix=''
+  
+while [ $# -gt 0 ]
+do
+  case "$1" in
+  -h|--help)
+    usage
+    ;;
+  -1|--mac)
+    prefix="$oui_random"
+    ;;
+  -2)
+    prefix="$oui_prefix"
+    ;;
+  -3)
+    prefix="$oui_changed"
+    ;;
+  ??:??:??)
+    prefix="$1"
+    ;;
+  --uuid|-u)
+    m_uuidgen
+    exit
+    ;;
+  *)
+    break
+  esac
+  shift
+done
+  
+if [ -n "$prefix" ] ; then
+  m_macaddr "$prefix"
+else
+  echo "OUI random:   $(m_macaddr "$oui_random")"
+  echo "OUI prefix:   $(m_macaddr "$oui_prefix")"
+  echo "OUI changed:  $(m_macaddr "$oui_changed")"
+  echo "UUID:         $(m_uuidgen)"
+fi
