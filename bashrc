@@ -125,6 +125,10 @@ mkdircd(){
 
 ge() {
   if [ -z "$DISPLAY" ] ; then
+    if [ -n "${EDITOR:-}" ] && type $EDITOR ; then
+      $EDITOR "$@"
+      return $?
+    fi
     if type ne ; then
       ne "$@"
       return $?
