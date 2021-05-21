@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Used to convert geany repository into geany.conf
+#
+exec 1>&2
+geany_dir=config/geany
+geany_base=$geany_dir/geany
+
+ctext="$($geany_dir/prepare.sh < $geany_base.conf | sed -e 's/^/:/')"
+otext="$(sed -e 's/^/:/' $geany_base.git)"
+
+if [ x"$ctext" != x"$otext" ] ; then
+  echo "Changes in $geany_base"
+  echo "$ctext" | sed -e 's/^://' > $geany_base.git
+fi
+
+

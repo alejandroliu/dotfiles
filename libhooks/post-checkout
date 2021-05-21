@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Used to convert geany repository into geany.conf
+#
+exec 1>&2
+geany_base=config/geany/geany
+[ ! -f $geany_base.conf ] && cp -av $geany_base.git $geany_base.conf
+

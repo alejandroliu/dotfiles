@@ -8,6 +8,7 @@ This requires [rcm][rcm].
 
 ```
 git clone --recursive https://github.com/alejandroliu/dotfiles.git $HOME/.dotfiles
+$HOME/.dotfiles/libhooks/prepare.sh
 env RCRC=$HOME/.dotfiles/rcrc rcup -v
 ```
 
