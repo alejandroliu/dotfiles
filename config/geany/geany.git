@@ -126,12 +126,12 @@ msgwindow_visible=false
 fullscreen=false
 scribble_text=Type here what you want, use it as a notice/scratch board
 scribble_pos=57
-
 msgwindow_position=400
-
 custom_date_format=
 save_config_on_file_change=true
 color_picker_palette=
+
+
 
 [build-menu]
 number_ft_menu_items=0
@@ -144,12 +144,6 @@ pref_search_always_wrap=false
 pref_search_current_file_dir=true
 find_all_expanded=false
 replace_all_expanded=false
-
-
-
-
-
-
 fif_regexp=false
 fif_case_sensitive=true
 fif_match_whole_word=false
@@ -175,10 +169,16 @@ replace_match_word_start=false
 replace_search_backwards=false
 replace_close_dialog=true
 
+
+
+
+
+
+
 [plugins]
 load_plugins=true
 custom_plugin_path=
-active_plugins=/usr/lib/geany/keyrecord.so;/usr/lib/geany/splitwindow.so;
+active_plugins=/usr/lib/geany/splitwindow.so;/usr/lib/geany/keyrecord.so;
 
 [VTE]
 send_cmd_prefix=
@@ -218,8 +218,8 @@ session_file=
 project_file_path=/home/alex/projects
 
 [files]
-
 recent_projects=
+
 
 
 
