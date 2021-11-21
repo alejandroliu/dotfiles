@@ -10,16 +10,17 @@ if type gsettings ; then
   gsettings set org.mate.Marco.window-keybindings tile-to-side-e '<Mod4>Right'
 fi
 
+IS_VIRTUAL=false
 if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
-  IS_VNC=true
-else
-  IS_VNC=false
+  IS_VIRTUAL=true
 fi
 
-if $IS_VNC ; then
+if ! $IS_VIRTUAL ; then
   type safeeyes && safeeyes & # Run SafeEyes
   type redshift-gtk && redshift-gtk & # Red shift display
+  type xbindkeys && xbindkeys & # Configure HotKeys
 fi
+
 #~ type owncloud && owncloud & # Sync NextCloud
 type parcellite && parcellite & # Clipboard manager
 #~ type pidgin && pidgin & # local chat client
