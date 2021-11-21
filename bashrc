@@ -33,7 +33,7 @@ _pre_command() {
       previous_command="$incmd"
     fi
   fi
-  
+
   if [ -z "$AT_PROMPT" ]; then
     return
   fi
@@ -66,6 +66,7 @@ _prompt_command() {
   else
     local w=""
   fi
+  echo -ne "\033]0;$(whoami)@$(uname -n):${PWD/#$HOME/\~}\007"
   PS1="${clr}${w}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$reset"
   #~ PS1="${clr}RV=$rv ($runtime sec$s) "'[\u@\h \W]\$ '"$reset"
   #~ PS1="${clr}RV=$rv ($runtime sec$s) $reset"'[\u@\h \W]\$ '"$clr$eop"
@@ -154,7 +155,7 @@ ge() {
 screen() {
   command screen "$@"
   rc=$?
-  tput cup $(tput lines) 0 
+  tput cup $(tput lines) 0
   return $rc
 }
 
