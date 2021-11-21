@@ -1,22 +1,21 @@
 #!/bin/sh
 
+IS_VIRTUAL=false
 if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
-  IS_VNC=true
-else
-  IS_VNC=false
+  IS_VIRTUAL=true
 fi
 
-# Configure keyboard... this is more suitable for my programming
-# lifestyle...
-$IS_VNC || setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 
 # Make sure this fonts are included...
 [ -d /usr/share/fonts/TTF ] && xset fp+ /usr/share/fonts/TTF
 [ -f $HOME/.Xdefaults ] && xrdb -merge $HOME/.Xdefaults
 
-type xbindkeys && xbindkeys & # Configure HotKeys
-#~ type xscreensaver && xscreensaver & # Run screen saver
+#
+# Other stuff moved to $HOME/.bin/autostart.sh
+#
 
+# Configure keyboard... this is more suitable for programming
+$IS_VIRTUAL || setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 
 #geany &
 #exec > /tmp/errors.log 2>&1
