@@ -14,7 +14,7 @@
         }
     ],
     "meta": {
-        "config_version": "6.0.1"
+        "config_version": "6.0.3"
     },
     "persist_state": false,
     "plugins": [
@@ -90,12 +90,12 @@
             "version": "0.0.2"
         },
         {
-            "enabled": true,
+            "enabled": false,
             "id": "healthstats",
             "settings": {
-                "statistics_reset_interval": 24
+                "statistics_reset_cron": "0 0 * * *"
             },
-            "version": "0.0.2"
+            "version": "0.0.3"
         },
         {
             "enabled": true,
@@ -105,6 +105,7 @@
     ],
     "postpone_duration": 5,
     "pre_break_warning_time": 5,
+    "random_order": true,
     "rpc_port": 7200,
     "short_break_duration": 15,
     "short_break_interval": 20,
@@ -131,5 +132,6 @@
     "shortcut_disable_time": 2,
     "shortcut_postpone": 65,
     "shortcut_skip": 9,
-    "strict_break": false
+    "strict_break": false,
+    "use_rpc_server": true
 }
