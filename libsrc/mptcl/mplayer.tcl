@@ -1,29 +1,29 @@
 #!/usr/bin/wish
 #
-# mplayer.tcl 
+# mplayer.tcl
 # Copyright (C) 2012 Alejandro Liu Ly
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without 
-# modification, are permitted provided that the following conditions are 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
 # met:
 #
-#    * Redistributions of source code must retain the above copyright notice, 
+#    * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
-#    * Redistributions in binary form must reproduce the above copyright 
-#      notice, this list of conditions and the following disclaimer in the 
+#    * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #
@@ -132,7 +132,7 @@ proc mptcl_MPRemote {w args} {
     # ARGS
     #    @param w - mplayer widget
     #    @param args - command to send to mplayer
-    
+
     upvar #0 $w data
     if {$data(fid) == ""} {return 0}
 
@@ -148,7 +148,7 @@ proc mptcl_MPRemote {w args} {
 proc mptcl_AbortTimers {w} {
     # Check running timers and abort them
     upvar #0 $w data
-    
+
     foreach prop [array names data prop,*] {
 	catch { after cancel data($prop) }
     }
@@ -207,7 +207,7 @@ proc mptcl_MPCmd_play {w} {
     # DESC
     #    Will start a stopped player.
 
-    upvar #0 $w data    
+    upvar #0 $w data
     if {$data(fid) != ""} return
     mptcl_MPLaunchPlayer $w
 }
@@ -225,8 +225,8 @@ proc mptcl_MPCmd_config {w args} {
 
     upvar #0 $w data
 
-    if { $args=="" } { 
-	error "Arguments \"$w\" Umpty!" 
+    if { $args=="" } {
+	error "Arguments \"$w\" Umpty!"
 	return 1
     }
     set labelargs [list]
@@ -249,7 +249,7 @@ proc mptcl_MPCmd_config {w args} {
 	    "-seekbar"	{}
 	    "-width" 	-
 	    "-height" 	{ lappend labelargs $param $value }
-	    default { 
+	    default {
 		error "Argument \"$param\" Error"
 		return 1
 	    }
@@ -268,7 +268,7 @@ proc mptcl_MPMouse {w mode} {
     # DESC
     #    Handles mouse movement by either showing or hiding the mouse.
     #
-    #    Essentially will hide the mouse until the user moves it, 
+    #    Essentially will hide the mouse until the user moves it,
     #    which will cause the mouse cursor to be shown.  It will
     #    then hide cursor after a few seconds of no mouse movement
     upvar #0 $w data
@@ -464,7 +464,7 @@ proc mptcl_MPhandleline {w line} {
 	    return
 	}
     }
-    # 
+    #
     if {$line == "Video: no video"} {
 	dict set data(meta) novideo 1
 	return
@@ -490,7 +490,7 @@ proc mptcl_MPhandleline {w line} {
     if {[regexp {^ANS_([_/a-z]+)='?(.*)'?$} $line -> prop val]} {
 	global mptcl_meta
 	debug "(ANS) $line <$prop=$val>"
-	
+
 	if {[info exists mptcl_meta($prop)]} {
 	    dict set data(meta) $prop $val
 	    dict unset data(meta) .$prop
@@ -533,9 +533,9 @@ proc mptcl_MPCmd_status {w} {
     #      is used if -callback and/or -seekbar are not active.
     #    - paused - media is active but paused.  This status is only available
     #      if -callback and/or -seekbar are not empty
-    #    - playing - media is active and being played.  This status is only 
+    #    - playing - media is active and being played.  This status is only
     #      available if -callback and/or -seekbar are not empty.
-    #      
+    #
     upvar #0 $w data
 
     if {$data(-file) == ""} { return "nomedia" }
@@ -555,13 +555,13 @@ proc mptcl_MPLoadtout {w count} {
     #	Media loading timed out
     # ARGS
     #    @param w - mplayer widget
-    #    @param count - number of on-going attempts 
+    #    @param count - number of on-going attempts
     # DESC
     #    Called when we fail to read or meta data properties
 
     upvar #0 $w data
     if {$data(fid) == ""} return
-    
+
     debug "<<<MEDIASTART TIMEOUT $count>>>"
     if {[incr $count -1] > 0} {
 	# Let's retry it again
@@ -578,7 +578,7 @@ proc mptcl_MPLoadtout {w count} {
     }
     # OK... retried too many times...
     dict unset data(meta) loading
-    
+
     _${w}_wcmd config -cursor ""
     _${w}_wcmd config -cursor "none"
     event generate $w <<MediaStart>>
@@ -586,7 +586,7 @@ proc mptcl_MPLoadtout {w count} {
 	catch { $data(-seekbar) mediastart }
     }
 }
-    
+
 proc mptcl_MPCmd_cget {w option} {
     #    Read widget options (widget sub-command)
     # ARGS
@@ -768,8 +768,8 @@ proc mptcl_MPCmd_volume {w {val {}} {abs {}}} {
     #    Current volume setting
     # DESC
     #    If no val is provided, will read the volume setting property.
-    # 
-    #    If val is specified will change the volume by the "val" in 
+    #
+    #    If val is specified will change the volume by the "val" in
     #    percentage.
     #    If abs is not provided, then the change will be relative,
     #    otherwise, val is the percentage value to set the volume to.
@@ -822,9 +822,9 @@ proc mplayer_bindings {w player} {
 
     bind $w <Key-grave> [list mptcl_MPRemote $player speed_set 0.5]
     bind $w <Key-1> [list mptcl_MPRemote $player speed_set 1.0]
-    bind $w <Key-2> [list mptcl_MPRemote $player speed_set 1.5]
-    bind $w <Key-3> [list mptcl_MPRemote $player speed_set 2.0]
-    bind $w <Key-4> [list mptcl_MPRemote $player speed_set 4.0]
+    bind $w <Key-2> [list mptcl_MPRemote $player speed_set 1.25]
+    bind $w <Key-3> [list mptcl_MPRemote $player speed_set 1.5]
+    bind $w <Key-4> [list mptcl_MPRemote $player speed_set 2.0]
 
     bind $w <Key-o> [list mptcl_MPRemote $player osd_show_progression]
     bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
