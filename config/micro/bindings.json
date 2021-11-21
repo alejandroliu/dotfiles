@@ -1,0 +1,10 @@
+{
+    "Alt-/": "lua:comment.comment",
+    "CtrlUnderscore": "lua:comment.comment",
+    "Ctrl-e":	"lua:comment.comment",
+    "Alt-Left": "SelectLeft",
+    "Alt-Right": "SelectRight",
+    "Alt-Up": "SelectUp",
+    "Alt-Down": "SelectDown",
+    "Alt-\\": "CommandMode"
+}
