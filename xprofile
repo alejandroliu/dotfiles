@@ -16,6 +16,8 @@ fi
 
 # Configure keyboard... this is more suitable for programming
 $IS_VIRTUAL || setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+# Enable Shift-NumLock to toggle mouse control to the keyboard number pad
+$IS_VIRTUAL || setxkbmap -option keypad:pointerkeys
 
 #geany &
 #exec > /tmp/errors.log 2>&1
