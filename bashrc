@@ -116,6 +116,7 @@ alias pharx="phar extract -f"
 alias pharl="phar list -f"
 alias kj='exit'
 alias gc='glibc'
+alias py='python3'
 
 #
 # Functions
