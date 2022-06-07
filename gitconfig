@@ -31,3 +31,5 @@
 	default = simple
 [hub]
 	protocol = https
+[credential "https://github.com"]
+	helper = !/usr/bin/gh auth git-credential
