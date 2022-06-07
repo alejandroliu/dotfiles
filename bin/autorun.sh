@@ -21,7 +21,9 @@ if ! $IS_VIRTUAL ; then
   type xbindkeys && xbindkeys & # Configure HotKeys
 fi
 
+type xconsole-helper && xconsole-helper &
+
 #~ type owncloud && owncloud & # Sync NextCloud
 type parcellite && parcellite & # Clipboard manager
-#~ type pidgin && pidgin & # local chat client
+type pidgin && pidgin & # local chat client
 
