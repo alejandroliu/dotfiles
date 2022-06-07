@@ -55,7 +55,7 @@
   Mod4 + KP_Subtract
 
 # Toggle audio output
-"patoggle2"
+"patoggle"
   Mod4 + KP_0
 
 # Lock screen
