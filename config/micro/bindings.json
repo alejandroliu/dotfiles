@@ -1,10 +1,13 @@
 {
     "Alt-/": "lua:comment.comment",
-    "CtrlUnderscore": "lua:comment.comment",
-    "Ctrl-e":	"lua:comment.comment",
+    "Alt-Down": "SelectDown",
     "Alt-Left": "SelectLeft",
     "Alt-Right": "SelectRight",
     "Alt-Up": "SelectUp",
-    "Alt-Down": "SelectDown",
-    "Alt-\\": "CommandMode"
+    "Alt-\\": "CommandMode",
+    "Alt-m": "lua:initlua.MouseToggle",
+    "Ctrl-e": "lua:comment.comment",
+    "Ctrl-j": "lua:initlua.MouseToggle",
+    "Ctrl-m": "lua:initlua.MouseToggle",
+    "CtrlUnderscore": "lua:comment.comment"
 }
