@@ -6,10 +6,10 @@ function MouseToggle()
   cmouse = config.GetGlobalOption("mouse")
   if cmouse then
     config.SetGlobalOption("mouse","false")
-    micro.InfoBar():Message("Mouse control is now ENABLED")
+    micro.InfoBar():Message("Mouse control is now DISABLED")
   else
     config.SetGlobalOption("mouse","true")
-    micro.InfoBar():Message("Mouse control is now DISABLED")
+    micro.InfoBar():Message("Mouse control is now ENABLED")
   end
 
 end
