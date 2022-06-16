@@ -131,8 +131,8 @@ ge() {
       $EDITOR "$@"
       return $?
     fi
-    if type ne ; then
-      ne "$@"
+    if type micro ; then
+      micro "$@"
       return $?
     fi
     vi "$@"
