@@ -115,8 +115,10 @@ alias mroe=more
 alias pharx="phar extract -f"
 alias pharl="phar list -f"
 alias kj='exit'
-alias gc='glibc'
 alias py='python3'
+
+alias qop=/usr/local/bin/op
+complete -F _root_command op
 
 #
 # Functions
