@@ -17,8 +17,12 @@ fi
 
 if ! $IS_VIRTUAL ; then
   type safeeyes && safeeyes & # Run SafeEyes
-  type redshift-gtk && redshift-gtk & # Red shift display
+  # type redshift-gtk && redshift-gtk & # Red shift display
   type xbindkeys && xbindkeys & # Configure HotKeys
+
+  # Really make double sure that this is set-up properly
+  setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+  setxkbmap -option keypad:pointerkeys
 fi
 
 type xconsole-helper && xconsole-helper &
@@ -26,4 +30,5 @@ type xconsole-helper && xconsole-helper &
 #~ type owncloud && owncloud & # Sync NextCloud
 type parcellite && parcellite & # Clipboard manager
 type pidgin && pidgin & # local chat client
+
 
