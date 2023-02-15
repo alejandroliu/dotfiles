@@ -162,5 +162,15 @@ screen() {
   return $rc
 }
 
+pkglst() {
+  xbps-query -m | awk -F- -v OFS=- '{ $NF="" ; NF=NF-1; print}' | sort -u
+}
+pkgdiff() {
+  local t=$(mktemp)
+  pkglst > $t
+  diff -u /var/log/install-pkgs.txt $t | grep -v '^ ' | grep -v '^@'
+  rm -f $t
+}
+
 # We do this last, to keep things cleaner
 previous_command=""
