@@ -192,7 +192,7 @@ sub process_file {
     my %attrs = ();
 
     while (<$fh>) {
-	last if (/$re--/);
+	last if (/$re--\s*$/);
 	s/\s+$//;
 	if (s/$re//) {
 	    $txt .= $_."\n";
