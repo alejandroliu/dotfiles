@@ -28,7 +28,12 @@ fi
 type xconsole-helper && xconsole-helper &
 
 #~ type owncloud && owncloud & # Sync NextCloud
-type parcellite && parcellite & # Clipboard manager
+( # Clipboard manager
+  exec > .parcellite.log 2>&1
+  type parcellite || exit 0
+  sleep 10
+  parcellite
+) &
 type pidgin && pidgin & # local chat client
 
 
