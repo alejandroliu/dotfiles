@@ -107,11 +107,15 @@ fi
 #
 # Aliases
 #
+alias more=less
+alias moer=less
+alias mroe=less
+export LESS='-s -X -R'
+
+alias fsd="$HOME/nethome/fsd"
 alias ls='ls --color=auto'
 alias mv='mv -i'
 alias cp='cp -i'
-alias moer=more
-alias mroe=more
 alias pharx="phar extract -f"
 alias pharl="phar list -f"
 alias kj='exit'
