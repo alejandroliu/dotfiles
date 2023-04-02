@@ -98,6 +98,7 @@ PROMPT_COMMAND='_prompt_command'
 shopt -s checkwinsize
 [ -d $HOME/.dotfiles/libpkgs/ecd ] && . $HOME/.dotfiles/libpkgs/ecd/cd.sh
 [ -d $HOME/.bin ] && export PATH=$PATH:$HOME/.bin
+[ -d $HOME/.gitbin ] && export PATH=$PATH:$HOME/.gitbin
 if [ -n "$DISPLAY" ] ; then
   if [ "$(hostname)" = "pch3" ] ; then
     export MPT_AO=pulse

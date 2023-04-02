@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Copyright 2014 Joe Block <jpb@unixorn.net>
+#
+# This script is released under the Apache 2.0 license
+#
+# I got tired of accidentally typing `git git foo` and git not realizing I
+# meant to just do `git foo`
+
+if [ x"$1" = x'git' ]; then
+  shift # chop off the extra git
+  exec git "$@"
+fi

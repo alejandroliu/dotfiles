@@ -1,7 +1,6 @@
 [user]
 	name = Alejandro Liu
 	email = alejandro_liu@hotmail.com
-
 [color]
   diff = auto
   status = auto
@@ -18,12 +17,12 @@
 [alias]
   co = checkout
   ci = commit
-  cp = cherry-pick -x
-  b = branch -v
-  r = remote -v
-  t = tag -l
-  unstage = reset HEAD
-  uncommit = reset --soft HEAD^
+  #cp = cherry-pick -x
+  #b = branch -v
+  #r = remote -v
+  #t = tag -l
+  #unstage = reset HEAD
+  #uncommit = reset --soft HEAD^
 
 [http]
 	sslVerify = false
