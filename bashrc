@@ -9,6 +9,7 @@ if [ -f /etc/bashrc ] ; then
   . /etc/bashrc
 fi
 
+export HISTSIZE=5000 HISTFILESIZE=500
 
 #
 # Custom prompt
@@ -90,8 +91,6 @@ FIRST_PROMPT=true
 _start=$SECONDS
 trap '_pre_command "$BASH_COMMAND"' DEBUG
 PROMPT_COMMAND='_prompt_command'
-
-
 
 # Bash checks the window size after each command and, if necessary,
 # updates the values of LINES and COLUMNS

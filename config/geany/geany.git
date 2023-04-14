@@ -131,8 +131,6 @@ custom_date_format=
 save_config_on_file_change=true
 color_picker_palette=
 
-
-
 [build-menu]
 number_ft_menu_items=0
 number_non_ft_menu_items=0
@@ -155,7 +153,7 @@ fif_files=
 fif_files_mode=0
 find_regexp=false
 find_regexp_multiline=false
-find_case_sensitive=false
+find_case_sensitive=true
 find_escape_sequences=false
 find_match_whole_word=false
 find_match_word_start=false
@@ -168,12 +166,6 @@ replace_match_whole_word=false
 replace_match_word_start=false
 replace_search_backwards=false
 replace_close_dialog=true
-
-
-
-
-
-
 
 [plugins]
 load_plugins=true
@@ -219,6 +211,4 @@ project_file_path=/home/alex/projects
 
 [files]
 recent_projects=
-
-
 
