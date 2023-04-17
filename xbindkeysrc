@@ -37,46 +37,41 @@
 #keystate_capslock = enable
 #keystate_scrolllock= enable
 
-# Examples of commands:
-
 "xbindkeys_show"
-  control+shift + q
+  Mod4 + h
 
-# Increase volume
-"pactl set-sink-volume @DEFAULT_SINK@ +1000"
-  Mod4 + KP_Add
 
-# Decrease volume
-"pactl set-sink-volume @DEFAULT_SINK@ -1000"
-  Mod4 + KP_Enter
-
-# Mute volume
-"pactl set-sink-mute @DEFAULT_SINK@ toggle"
-  Mod4 + KP_Subtract
-
-# Toggle audio output
-"patoggle"
-  Mod4 + KP_0
-
-# Lock screen
-"mate-screensaver-command -l"
-  Mod4 + l
-
-# File Manager
-"caja"
+# LXQT compat
+"wmex.sh show-desktop"
+  Mod4 + d
+"wmex.sh tile-to-side w"
+  Mod4 + Left
+"wmex.sh tile-to-side e"
+  Mod4 + Right
+"wmex.sh maximize"
+  Mod4 + Up
+"wmex.sh minimize"
+  Mod4 + Down
+"wmex.sh file-mgr"
   Mod4 + e
-
-# Task Manager
-"mate-system-monitor"
-  control+shift+Escape
-
-# Search tool
-"mate-search-tool"
-  Mod4 + f
-
-# Run dialog
-"mate-panel --run-dialog"
+"wmex.sh print-screen"
+  Mod4 + Print
+"xdg-screensaver lock"
+  Mod4 + l
+"wmex.sh home-page"
+  XF86HomePage
+"wmex.sh mail"
+  XF86Mail
+"wmex.sh calculator"
+  XF86Calculator
+"wmex.sh runcmd"
   Mod4 + r
+"wmex.sh win-switcher"
+  Mod4 + Escape
+"wmex.sh runmenu"
+  Control + Escape
+"wmex.sh sysmon"
+  Mod4 + s
 
 
 ##################################
