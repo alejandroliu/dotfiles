@@ -9,7 +9,7 @@ if [ -f /etc/bashrc ] ; then
   . /etc/bashrc
 fi
 
-export HISTSIZE=5000 HISTFILESIZE=500
+export HISTSIZE=5000 HISTFILESIZE=5000
 
 #
 # Custom prompt
@@ -81,7 +81,7 @@ _prompt_command() {
   if [ -n "$DISPLAY" ] ; then
     if type notify-send >/dev/null 2>&1 ; then
       if (( $runtime > $NOTIFY_DELAY )) ; then
-	notify-send "COMPLETED in $runtime secs" "$previous_command"
+	notify-send -a "Run" "COMPLETED in $runtime secs" "$previous_command"
       fi
     fi
   fi
