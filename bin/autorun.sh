@@ -1,46 +1,18 @@
 #!/bin/sh
 #~ export PATH=$PATH:$HOME/.bin:$HOME/.gitbin
 
-#~ if type gsettings ; then
-  #~ # Make sure we have a more windows like settings...
-  #~ gsettings set org.mate.Marco.global-keybindings show-desktop '<Mod4>d' #'<Control><Alt>d'
-  #~ gsettings set org.mate.Marco.global-keybindings panel-main-menu '<Control>Escape' #'<Alt>F1'
-  #~ gsettings set org.mate.Marco.window-keybindings maximize '<Mod4>Up'
-  #~ gsettings set org.mate.Marco.window-keybindings minimize '<Mod4>Down'
-  #~ gsettings set org.mate.Marco.window-keybindings tile-to-side-w '<Mod4>Left'
-  #~ gsettings set org.mate.Marco.window-keybindings tile-to-side-e '<Mod4>Right'
-#~ fi
-
-IS_VIRTUAL=false
-if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
-  IS_VIRTUAL=true
-fi
+(xdpyinfo | grep -q XVNC-EXTENSION) && IS_VIRTUAL=true
 
 if ! $IS_VIRTUAL ; then
-  type safeeyes && (
-    sleep 10
-    if ! ( ps ax | grep python | grep safeeyes ) ; then
-      exec safeeyes
-    fi
-  ) & # Run SafeEyes
+  :
+  # type safeeyes && ( sleep 10 ; safeeyes ) &
   # type redshift-gtk && redshift-gtk & # Red shift display
-  #~ type xbindkeys && xbindkeys # Configure HotKeys
-
-  # Really make double sure that this is set-up properly
-  setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
-  setxkbmap -option keypad:pointerkeys
 fi
 
-if [ -n "$(pidof xconsole)" ] ; then
-  type xconsole-helper && xconsole-helper &
-fi
+#~ if [ -n "$(pidof xconsole)" ] ; then
+  #~ type xconsole-helper && xconsole-helper &
+#~ fi
 
-(
-  type pidgin && pidgin & # local chat client
-
-  sleep 10 # race condition!
-  type parcellite && parcellite & # clipboard manager
-
-  exit
-) &
+type pidgin && pidgin & # local chat client
+# type parcellite && parcellite & # clipboard manager
 

@@ -1,28 +1,26 @@
 #!/bin/sh
+#
+# This is run by the /etc/X11/xinit/session or /etc/X11/xdm/Xsession
+# scripts early in the process.  Before the Desktop Environment
+# is present.
+#
 
 IS_VIRTUAL=false
-if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
-  IS_VIRTUAL=true
-fi
+(xdpyinfo | grep -q XVNC-EXTENSION) && IS_VIRTUAL=true
 
 
 # Make sure this fonts are included...
 [ -d /usr/share/fonts/TTF ] && xset fp+ /usr/share/fonts/TTF
 [ -f $HOME/.Xdefaults ] && xrdb -merge $HOME/.Xdefaults
 
-#
-# Other stuff moved to $HOME/.bin/autostart.sh
-#
 
-# Configure keyboard... this is more suitable for programming
-$IS_VIRTUAL || setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
-# Enable Shift-NumLock to toggle mouse control to the keyboard number pad
-$IS_VIRTUAL || setxkbmap -option keypad:pointerkeys
+if ! $IS_VIRTUAL ; then
+  # Configure keyboard... this is more suitable for programming
+  setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+  # Enable Shift-NumLock to toggle mouse control to the keyboard number pad
+  $IS_VIRTUAL || setxkbmap -option keypad:pointerkeys
+fi
 
-#geany &
-#exec > /tmp/errors.log 2>&1
-
-#xbindkeys &
 #(
 #  sleep 500
 #  xset dpms 1800 3600 7200
