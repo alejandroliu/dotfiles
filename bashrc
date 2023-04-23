@@ -81,7 +81,9 @@ _prompt_command() {
   if [ -n "$DISPLAY" ] ; then
     if type notify-send >/dev/null 2>&1 ; then
       if (( $runtime > $NOTIFY_DELAY )) ; then
-	notify-send -a "Run" "COMPLETED in $runtime secs" "$previous_command"
+	notify-send -a "Run $(set - $previous_command ; echo $1)" \
+	"COMPLETED in $runtime secs" \
+	"$previous_command"
       fi
     fi
   fi
