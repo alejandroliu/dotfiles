@@ -13,12 +13,16 @@ IS_VIRTUAL=false
 [ -d /usr/share/fonts/TTF ] && xset fp+ /usr/share/fonts/TTF
 [ -f $HOME/.Xdefaults ] && xrdb -merge $HOME/.Xdefaults
 
-
 if ! $IS_VIRTUAL ; then
   # Configure keyboard... this is more suitable for programming
   setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
   # Enable Shift-NumLock to toggle mouse control to the keyboard number pad
   $IS_VIRTUAL || setxkbmap -option keypad:pointerkeys
+
+  # Make sure NUMLOCK is on
+  case "$(uname -n)" in
+    *) numlockx on ;;
+  esac
 fi
 
 #(
