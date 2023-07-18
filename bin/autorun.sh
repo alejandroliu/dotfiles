@@ -1,4 +1,21 @@
 #!/bin/sh
+is_xrdp() {
+  [ -z "$DISPLAY" ] && return 1
+  local port=$(echo $DISPLAY | cut -d . -f1 | tr -d :)
+  local xorgpid=$(ss -lxp | awk '$5 == "/tmp/.X11-unix/X'"$port"'" {
+      if (match($0, /,pid=([0-9]+)/,arr)) {
+        print arr[1];
+      }
+    }')
+  [ -z "$xorgpid" ]  && return 1
+  local sesspid=$(awk '$1 == "PPid:" { print $2 }' /proc/$xorgpid/status)
+  [ -z "$sesspid" ] && return 1
+  local name=$(awk '$1 == "Name:" { print $2 }' /proc/$sesspid/status)
+  if [ x"$name" = x"xrdp-sesman" ] ; then
+    return 0
+  fi
+  return 1
+}
 
 if type gsettings ; then
   # Make sure we have a more windows like settings...
@@ -12,6 +29,8 @@ fi
 
 IS_VIRTUAL=false
 if (xdpyinfo | grep -q XVNC-EXTENSION) ; then
+  IS_VIRTUAL=true
+elif is_xrdp ; then
   IS_VIRTUAL=true
 fi
 
