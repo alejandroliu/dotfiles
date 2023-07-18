@@ -10,4 +10,4 @@ cp -av $libhookdir/post-checkout $gitdir/.git/hooks/post-checkout
 cp -av $libhookdir/post-checkout $gitdir/.git/hooks/post-merge
 
 # make sure post hook is run!
-( cd $gidir ; sh .git/hooks/post-checkout )
+( cd $gitdir ; sh .git/hooks/post-checkout )
