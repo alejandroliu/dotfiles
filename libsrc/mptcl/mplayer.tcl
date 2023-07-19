@@ -136,7 +136,7 @@ proc mptcl_MPRemote {w args} {
     upvar #0 $w data
     if {$data(fid) == ""} {return 0}
 
-    debug "CMD: $args"
+    #~ debug "CMD: $args"
     if {[lindex $args 0] == "-c"} {
 	catch { puts -nonewline $data(fid) [join [lreplace $args 0 0] " "] }
     } else {
