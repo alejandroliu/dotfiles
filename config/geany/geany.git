@@ -170,7 +170,7 @@ replace_close_dialog=true
 [plugins]
 load_plugins=true
 custom_plugin_path=
-active_plugins=/usr/lib/geany/keyrecord.so;/usr/lib/geany/splitwindow.so;/usr/lib64/geany/automark.so;/usr/lib64/geany/git-changebar.so;/usr/lib64/geany/keyrecord.so;/usr/lib64/geany/spellcheck.so;/usr/lib64/geany/splitwindow.so;
+active_plugins=/usr/lib/geany/keyrecord.so;/usr/lib/geany/splitwindow.so;/usr/lib64/geany/git-changebar.so;/usr/lib64/geany/keyrecord.so;/usr/lib64/geany/pairtaghighlighter.so;/usr/lib64/geany/spellcheck.so;/usr/lib64/geany/splitwindow.so;
 
 [VTE]
 send_cmd_prefix=
