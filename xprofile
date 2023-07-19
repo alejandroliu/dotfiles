@@ -5,6 +5,8 @@
 # is present.
 #
 
+export HK_HELPER_SAVE_SCREENSHOT_FILE=1
+
 IS_VIRTUAL=false
 (xdpyinfo | grep -q XVNC-EXTENSION) && IS_VIRTUAL=true
 
