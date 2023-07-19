@@ -176,5 +176,48 @@ pkgdiff() {
   rm -f $t
 }
 
+git_local_user() {
+  [ $# -eq 0 ] && set - '--work'
+  local mode name email
+  while [ $# -gt 0 ]
+  do
+    case "$1" in
+    --work) mode='work' ; name='Alejandro Liu' ; email='alejandrol@t-systems.com' ;;
+    --personal) mode='personal' ; name='Alejandro Liu' ; email='alejandro_liu@hotmail.com' ;;
+    *)
+      echo 'Usage: $0 [--work|--personal]'
+      return 0
+    esac
+    shift
+  done 
+  
+  if [ ! -d '.git' ] ; then
+    echo 'You must be a the root of a git repository when you run this command.'
+    return 1
+  fi
+  local yn
+  for yn in user.name user.email
+  do
+    git config --show-origin --get $yn
+  done
+  
+  echo -n 'Configure local $mode addresses? (y/N) ' 1>&2
+  read yn
+  case "$yn" in
+  y*|Y*)
+    echo 'Configuring local addresses' 1>&2
+    git config user.name "$name" || return 1
+    git config user.email "$email" || return 1
+    return 0
+    ;;
+  *)
+    echo 'Aborting' 1>&2
+    return 1
+    ;;
+  esac
+}
+
+
 # We do this last, to keep things cleaner
 previous_command=""
+
