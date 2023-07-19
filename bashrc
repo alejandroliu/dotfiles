@@ -108,10 +108,8 @@ fi
 complete -F _root_command op
 export LESS='-s -X -R'
 
-. $HOME/.dotfiles/aliases.sh
-. $HOME/.dotfiles/functions.sh
-
-
+. $HOME/.aliases.sh
+. $HOME/.functions.sh
 
 # We do this last, to keep things cleaner
 previous_command=""
