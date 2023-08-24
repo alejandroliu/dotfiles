@@ -1,0 +1,4 @@
+[indentation]
+width=2
+# 0 is spaces, 1 is tabs, 2 is tab & spaces
+type=0
