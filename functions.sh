@@ -92,3 +92,23 @@ git_local_user() {
     ;;
   esac
 }
+
+git() {
+  command git "$@"
+  local ret=$?
+  if [ x"$1" = x"clone" ] && [ $ret -eq 0 ] ; then
+    # Determine the new clone location
+    local dir=
+    eval local i=\"\$$#\"
+    if [ -d "$i" ] ; then
+      dir="$i"
+    elif [ -d "$(basename "$i" '.git')" ] ; then
+      dir="$(basename "$i" '.git')"
+    else
+      echo "Unable to determine clone directory" 1>&2
+      return $ret
+    fi
+    echo "CLONED: $dir"
+  fi
+  return $ret
+}
