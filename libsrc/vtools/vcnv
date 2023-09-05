@@ -118,8 +118,12 @@ opt_do_vcodec() {
 }
 
 define_val vopts \
-  "-preset slow -crf 23 -profile:v baseline -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  "-preset slow -crf 23 -profile:v high10 -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
   "flags : additional video flags"
+
+#~ define_val vopts \
+  #~ "-preset slow -crf 23 -profile:v baseline -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  #~ "flags : additional video flags"
 #~ define_val vopts \
   #~ "-preset slow -crf 28 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
   #~ "flags : additional video flags"
@@ -156,9 +160,24 @@ opt_help_rotate() {
 opt_bool_sd() {
   opt_val_vfilter scale=-1:576
 }
+
 opt_help_sd() {
   echo "	--sd : Reduces HD video to SD"
 }
+
+opt_bool_sdx() {
+  opt_no_vfilter
+  opt_val_vfilter scale=-1:480
+  opt_val_vfilter pad="ceil(iw/2)*2:ceil(ih/2)*2"
+  opt_val_vopts "-preset veryslow -crf 32 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  opt_val_acodec copy
+  #~ opt_val_abr 64k
+}
+
+opt_help_sdx() {
+  echo "	--sdx : Reduces HD video to SD (with additional settings)"
+}
+
 opt_bool_sdp() {
   opt_val_vfilter scale=-1:720
 }
