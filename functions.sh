@@ -93,6 +93,10 @@ git_local_user() {
   esac
 }
 
+widen() {
+  printf "\x1B[8;40;132t"
+}
+
 git() {
   command git "$@"
   local ret=$?
