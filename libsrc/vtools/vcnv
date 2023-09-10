@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 script=$(cd $(dirname $0) ; pwd)/$(basename $0)
 temp=$(mktemp)
 chmod u+x $temp
 (
-  echo '#!/bin/sh'
+  echo '#!/bin/bash'  # Make sure we use bash
   echo "# rm -f $temp"
   while read L
   do
@@ -297,18 +297,32 @@ in2out() {
 }
 
 transcode() (
-  set -x
-  command \
-    "${FFMPEG_CMD[@]}" \
-    -i "$1" \
-    "${FFMPEG_OPTS[@]}" \
-    "$2"
-  if [ $? -ne 0 ] ; then
-    rm -f "$2"
+  local ifile="$1" ofile="$2"
+  if [ -d "$ofile" ] ; then
+    ofile="$ofile/$(basename "$ifile")"
+  fi
+  if [ x"$(readlink -f "$ifile")" = x"$(readlink -f "$ofile")" ] ; then
+    # Input and output are the same file
+    echo "Input and output are the same file" 1>&2
     return 1
   fi
-  [ ! -f "$2" ] && fatal "Unable to create file $2"
-  touch --reference="$1" "$2"
+
+  ( set -x ; command \
+    "${FFMPEG_CMD[@]}" \
+    -i "$ifile" \
+    "${FFMPEG_OPTS[@]}" \
+    "$ofile" )
+  #~ ( set -x ; command \
+    #~ "${FFMPEG_CMD[@]}" \
+    #~ -i "$ifile" \
+    #~ "${FFMPEG_OPTS[@]}" \
+    #~ "$ofile"  </dev/null 2>&3) 3>&2 2>> log
+  if [ $? -ne 0 ] ; then
+    rm -f "$ofile"
+    return 1
+  fi
+  [ ! -f "$ofile" ] && fatal "Unable to create file $ofile"
+  touch --reference="$ifile" "$ofile"
 )
 
 FFMPEG_CMD=( ffmpeg )
@@ -330,7 +344,7 @@ else
     (
       for file in "${input[@]}"
       do
-	echo "file '$(cd $(dirname "$file") && pwd)/$(basename "$file")'"
+        echo "file '$(cd $(dirname "$file") && pwd)/$(basename "$file")'"
       done
     ) >$demux
     touch --reference="${input[0]}" "$demux"
@@ -343,8 +357,11 @@ else
     fi
     for infile in "${input[@]}"
     do
-      outfile=$(in2out "$infile")
-      [ -n "$output" ] && outfile="$output/$outfile"
+      if [ -n "$output" ] ; then
+	outfile="$output"
+      else
+	outfile=$(in2out "$infile")
+      fi
       transcode "$infile" "$outfile"
     done
   fi
