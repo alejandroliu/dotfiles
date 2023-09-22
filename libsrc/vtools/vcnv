@@ -81,6 +81,12 @@ opt_do_overwrite() {
   [ "$overwrite" = "yes" ] && FFMPEG_CMD+=( -y )
 }
 
+define_bool verbose "yes" \
+  "Do not show that much output"
+opt_do_verbose() {
+  [ "$verbose" = "no" ] && FFMPEG_CMD+=(  -loglevel warning -hide_banner )
+}
+
 define_val start '' \
   "hh:mm:ss[.xxx] : specify the start position for transcoding"
 opt_do_start() {
