@@ -111,6 +111,28 @@ export LESS='-s -X -R'
 . $HOME/.aliases.sh
 . $HOME/.functions.sh
 
+#
+# Weirdly persistent ssh-agent
+#
+function tmux_agent() {
+  [ -z "$TMUX" ] && return
+
+  # We only do this on a TMUX session
+  if [ -f $HOME/.ssh-agent ] ; then
+    (
+      exec >/dev/null 2>&1
+      . $HOME/.ssh-agent
+      [ ! -d /proc/$SSH_AGENT_PID ] && rm -f $HOME/.ssh-agent
+    )
+  fi
+
+  [ ! -f $HOME/.ssh-agent ] && command ssh-agent "$@" > $HOME/.ssh-agent
+  . $HOME/.ssh-agent
+}
+
+[ -n "$TMUX" ]  && tmux_agent
+
+
 # We do this last, to keep things cleaner
 previous_command=""
 
