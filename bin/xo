@@ -1,0 +1,77 @@
+#!/bin/sh
+if [ $# -eq 0 ] ; then
+  echo "Usage: $0 [--query|--query-all] files ..."
+  exit 1
+fi
+
+query=false
+qall=false
+while [ $# -gt 0 ]
+do
+  case "$1" in
+  -q|--query) query=true ; qall=false ;;
+  -Q|--query-all) query=true ; qall=true ;;
+  -r|--run) query=false ;;
+  *) break ;;
+  esac
+  shift
+done
+
+if $query ; then
+  for f in "$@"
+  do
+    if [ ! -e "$f" ] ; then
+      echo "$f: not found" 1>&2
+      continue
+    fi
+    mime=$(xdg-mime query filetype "$f")
+    if [ -z "$mime" ] ; then
+      echo "$f: Not recognized" 1>&2
+      continue
+    fi
+    if type mimeapps >/dev/null 2>&1 ; then
+      apps=$(mimeapps $mime)
+    else
+      apps=''
+    fi
+    defapp=$(xdg-mime query default "$mime")
+    if [ -z "$apps" ] && [ -z "$defapp" ] ; then
+      echo "$f: No registered applications for $mime" 1>&2
+      continue
+    fi
+    if $qall ; then
+      found=false
+      for app in $apps
+      do
+	echo -n "$f: $app"
+	if [ x"$app" = x"$defapp" ] ; then
+	  echo -n " (DEFAULT: $mime)"
+	  found=true
+	fi
+	echo ''
+      done
+      if ! $found ; then
+	echo "$f: $mime defaults to $defapp"
+      fi
+    else
+      if [ -z "$defapp" ] ; then
+        echo "$f: No default application ($apps)"
+      else
+        echo "$f: $defapp ($mime)"
+      fi
+    fi
+  done
+else
+  for f in "$@"
+  do
+    [ ! -e "$f" ] && continue
+    mime=$(xdg-mime query filetype "$f")
+    defapp=$(xdg-mime query default "$mime")
+    if [ -z "$defapp" ] ; then
+      echo "$f: No default application ($mime)" 1>&2
+      continue
+    fi
+    xdg-open "$f" &
+    sleep 0.5
+  done
+fi
