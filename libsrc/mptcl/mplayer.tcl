@@ -797,6 +797,45 @@ proc mptcl_MPCmd_loadfile {w f} {
     mptcl_MPRemote $w loadfile [mptcl_MPquote $f]
 }
 
+proc human {bytes} {
+  set i 0
+  set byteUnits [list B kB MB GB TB PB EB ZB]
+
+  while {$bytes > 1024} {
+    incr i
+    set bytes [expr {$bytes / 1024.0}]
+  }
+  return "[format "%.2f" $bytes] [lindex $byteUnits $i]"
+}
+
+proc mptcl_UI_length {player} {
+  upvar #0 $player data
+  set tt [expr {int([dict get $data(meta) length])}]
+  set se [expr {$tt % 60}]
+  set tt [expr {$tt / 60}]
+  set mi [expr {$tt % 60}]
+  set tt [expr {$tt / 60}]
+  return [format "%d:%02d:%02d" $tt $mi $se]
+}
+
+set mptcl_UI_info_time 0
+proc mptcl_UI_info {player} {
+  mptcl_MPRemote $player osd_show_property_text {${filename}}
+  global mptcl_UI_info_time
+  if {$mptcl_UI_info_time == [clock seconds]} {
+    set fn [$player cget -file]
+    set sz [file size $fn]
+
+    tk_messageBox \
+	       -icon "info" \
+	       -message [format "File: %s\nFolder: %s\nSize: %s\nLength: %s" \
+			     [file tail $fn] [file dir $fn] [human $sz] [mptcl_UI_length $player]] \
+	       -title "MediaPlay" \
+	       -parent [winfo toplevel $player] \
+	       -type "ok"
+  }
+  set mptcl_UI_info_time [clock seconds]
+}
 
 proc mplayer_bindings {w player} {
     #    Define mplayer compatible bindings (Utility function)
@@ -827,7 +866,9 @@ proc mplayer_bindings {w player} {
     bind $w <Key-4> [list mptcl_MPRemote $player speed_set 2.0]
 
     bind $w <Key-o> [list mptcl_MPRemote $player osd_show_progression]
-    bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
+    #~ bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
+    bind $w <Key-i> [list mptcl_UI_info $player]
+    #~ bind $w <Key-i> [list mptcl_MPRemote $player osd_show_property_text {${filename}}]
     bind $w <Key-X> [list $player abort]
     bind $w <Key-s> [list mptcl_MPRemote $player sub_select]
     bind $w <Key-S> [list mptcl_MPRemote $player sub_select -1]

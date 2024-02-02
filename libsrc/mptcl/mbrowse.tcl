@@ -1,29 +1,29 @@
 #!/usr/bin/wish
 #
-# mbrowse.tcl 
+# mbrowse.tcl
 # Copyright (C) 2012 Alejandro Liu Ly
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without 
-# modification, are permitted provided that the following conditions are 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
 # met:
 #
-#    * Redistributions of source code must retain the above copyright notice, 
+#    * Redistributions of source code must retain the above copyright notice,
 #      this list of conditions and the following disclaimer.
-#    * Redistributions in binary form must reproduce the above copyright 
-#      notice, this list of conditions and the following disclaimer in the 
+#    * Redistributions in binary form must reproduce the above copyright
+#      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #
@@ -49,6 +49,36 @@ proc mptcl_shuffle { lst } {
     }
     return $retval
 }
+
+proc mptcl_tailcmp {a b} {
+  return [string compare [file tail $a] [file tail $b]]
+}
+
+proc mptcl_grp_shuffle { mode lst } {
+  array set grps {}
+  foreach i $lst {
+    set g [regsub {^([A-Za-z0-9]+).*$} \
+      [regsub {^[^A-Za-z0-9]*} [file tail $i] {}] \
+      {\1}]
+    if {$mode == "g"} {
+      set g [file join [file dirname $i] $g]
+    }
+    if {[info exists grps($g)]} {
+      lappend grps($g) $i
+    } else {
+      set grps($g) [list $i]
+    }
+  }
+  set glst [mptcl_shuffle [array names grps]]
+  set retval [list]
+  foreach g $glst {
+    #~ puts "$g [llength $grps($g)] $grps($g)"
+    #~ lappend retval {*}$grps($g)
+    lappend retval {*}[lsort -command mptcl_tailcmp $grps($g)]
+  }
+  return $retval
+}
+
 
 proc mptcl_tcmp {dir a b} {
   set ma [file mtime $a]
@@ -100,7 +130,7 @@ proc mptcl_process {item list_ref} {
 proc mbrowser {w args} {
     #1. default spec
     upvar #0 $w data
-    
+
     set specs {
 	{ -relief	""	""	raised 			}
 	{ -background	""	""	#000000 		}
@@ -120,7 +150,7 @@ proc mbrowser {w args} {
 	set data(-background) $data(-bg)
     }
     if { $data(-bd) } {
-	set data(-borderwidth) $data(-bd) 
+	set data(-borderwidth) $data(-bd)
     }
 
     if {[winfo exist $w]} {
@@ -214,7 +244,7 @@ proc mptcl_fit_view {p wi he} {
 
 proc mptcl_resize_apply {w p wi he} {
     upvar #0 $w data
-    
+
     set data(w) $wi
     set data(h) $he
 
@@ -255,8 +285,8 @@ proc mptcl_BrowserCmd_fullscreen {w args} {
 proc mptcl_BrowserCmd_config {w args} {
     upvar #0 $w data
 
-    if { $args=="" } { 
-	error "Arguments \"$w\" Umpty!" 
+    if { $args=="" } {
+	error "Arguments \"$w\" Umpty!"
 	return 1
     }
     set wargs [list]
@@ -290,7 +320,7 @@ proc mptcl_BrowserCmd_config {w args} {
 	    "-bd"	-
 	    "-menu"	-
 	    "-borderwidth" { lappend wargs $param $value }
-	    default { 
+	    default {
 		error "Argument \"$param\" Error"
 		return 1
 	    }

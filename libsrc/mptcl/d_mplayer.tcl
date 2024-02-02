@@ -34,6 +34,12 @@ proc main {args} {
 	    -T {
 		set shuffle T
 	    }
+	    -gg {
+		set shuffle g
+	    }
+	    -G {
+		set shuffle G
+	    }
 	    --keep -
 	    -K {
 		set keep 1
@@ -56,6 +62,12 @@ proc main {args} {
     switch -- $shuffle {
       S {
 	set flist [mptcl_shuffle $flist]
+      }
+      g {
+	set flist [mptcl_grp_shuffle g $flist]
+      }
+      G {
+	set flist [mptcl_grp_shuffle G $flist]
       }
       t {
 	set flist [mptcl_tsort $flist 1]
@@ -147,7 +159,7 @@ proc dirmenu {m bdir cmd} {
 	-command [list {*}$cmd $m $bdir -place] \
 	-label "Place here..."
     $m add separator
-    
+
     set dirs [lsort -dictionary [glob \
 			 -nocomplain \
 			 -directory $bdir \
@@ -161,7 +173,7 @@ proc dirmenu {m bdir cmd} {
 	    menu $sm -tearoff 0
 	    $m add cascade \
 		-menu $sm \
-		-label $d 
+		-label $d
 	    dirmenu $sm [file join $bdir $d] $cmd
 	}
 	$m add separator
