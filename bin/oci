@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Automatically configure things...
+#
+set -euf
+(set -o pipefail >/dev/null 2>&1) && set -o pipefail || :
+mydir=$(dirname "$(readlink -f "$0")")
+myname=$(basename "$(readlink -f "$0")")
+pydir="$mydir/.$myname"
+
+oci_install() {
+  python3 -m venv --system-site-packages "$1"
+  (
+    . "$1"/bin/activate
+    pip install oci-cli
+  )
+}
+
+if [ ! -d "$pydir" ] ; then
+  oci_install "$pydir"
+else
+  if [ $# -gt 0 ] && [ x"$1" = x"--reinstall" ] ; then
+    rm -rf "$pydir"
+    oci_install "$pydir"
+    exit $?
+  fi
+fi
+. "$pydir"/bin/activate
+exec "$pydir/bin/oci" "$@"
