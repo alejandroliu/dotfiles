@@ -69,6 +69,16 @@ foreach i [array names mptcl_meta] {
 }
 unset i
 
+proc seconds {} {
+  # Get the number of seconds from /proc/uptime
+  if {[catch {open "/proc/uptime" "r"} fd]} {
+    return [clock seconds]
+  }
+  set txt [read $fd]
+  close $fd
+  return [lindex $txt 0]
+}
+
 #########################
 # mplayer command
 #
@@ -822,7 +832,7 @@ set mptcl_UI_info_time 0
 proc mptcl_UI_info {player} {
   mptcl_MPRemote $player osd_show_property_text {${filename}}
   global mptcl_UI_info_time
-  if {$mptcl_UI_info_time == [clock seconds]} {
+  if {([seconds] - $mptcl_UI_info_time) < 1.00} {
     set fn [$player cget -file]
     set sz [file size $fn]
 
@@ -833,8 +843,9 @@ proc mptcl_UI_info {player} {
 	       -title "MediaPlay" \
 	       -parent [winfo toplevel $player] \
 	       -type "ok"
+  } else {
+    set mptcl_UI_info_time [seconds]
   }
-  set mptcl_UI_info_time [clock seconds]
 }
 
 proc mplayer_bindings {w player} {
