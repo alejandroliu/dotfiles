@@ -103,11 +103,11 @@ proc mptcl_tsort { lst {dir 1} } {
 #
 # Process file items
 #
-proc mptcl_process {item list_ref} {
+proc mptcl_process {item list_ref {select {}}} {
     upvar $list_ref flist
     if {[file isdir $item]} {
 	foreach f [lsort -dictionary [glob -directory $item -nocomplain "*"]] {
-	    mptcl_process $f flist
+	    mptcl_process $f flist $select
 	}
 	return
     }
@@ -116,9 +116,19 @@ proc mptcl_process {item list_ref} {
     global _mptcllib_mfilter _mptcllib_min_size
     if {[file size $item] < $_mptcllib_min_size} return
     set ext [string tolower [file extension $item]]
-    if {[info exists _mptcllib_mfilter($ext)]} {
-	lappend flist $item
+    if {![info exists _mptcllib_mfilter($ext)]} return
+
+    if {$select != ""} {
+      foreach opt $select {
+	foreach {mode pattern} $opt break
+	set m [regexp $pattern $item]
+	switch $mode {
+	  s { if {!$m} return }
+	  f { if {$m} return }
+	}
+      }
     }
+    lappend flist $item
 }
 
 ######################################################################

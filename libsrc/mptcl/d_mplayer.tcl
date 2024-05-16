@@ -21,6 +21,7 @@ proc main {args} {
     set max 0
     set classify {}
     set keep 0
+    set selector [list]
 
     foreach item $args {
 	switch -glob -- $item {
@@ -54,11 +55,19 @@ proc main {args} {
 	    -F {
 		set max 1
 	    }
+	    --select=* {
+	      lappend selector [list "s" [regsub {^--select=} $item {}]]
+	    }
+	    --filter=* {
+	      lappend selector [list "f" [regsub {^--filter=} $item {}]]
+	    }
 	    default {
-		mptcl_process $item flist
+		mptcl_process $item flist $selector
 	    }
 	}
     }
+    #~ puts [join $flist "\n"]
+    #~ exit
     switch -- $shuffle {
       S {
 	set flist [mptcl_shuffle $flist]
