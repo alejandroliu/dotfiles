@@ -43,6 +43,12 @@ interp alias {} debug {} puts
 variable mptcl_mouse_timeout 3000	;# milli-seconds before hiding the mouse
 variable mptcl_exe \
     [list /usr/bin/mplayer mplayer] 	;# path to mplayer executable
+variable mptcl_fixed_args \
+    [list \
+	  -zoom -slave \
+	  -af scaletempo \
+    ]					;# Fixed args to mplayer command
+
 variable mptcl_proptout 250		;# time-out period to wait for property
 variable mptcl_metatout 1000		;# time-out period to wait for meta data
 variable mptcl_metaretry 3		;# Number of tries to load meta data
@@ -331,10 +337,9 @@ proc mptcl_MPLaunchPlayer {w} {
     }
 
     if {$data(fid) == ""} {
-	global mptcl_exe
+	global mptcl_exe mptcl_fixed_args
 	set arglst [list \
-			-zoom \
-			-slave \
+			{*}$mptcl_fixed_args \
 			-wid $data(wid) \
 		       ]
 	foreach {cc evkey} {-vo MPT_VO -ao MPT_AO} {
@@ -360,6 +365,7 @@ proc mptcl_MPLaunchPlayer {w} {
 	}
 	lappend arglst $data(-file)
 	foreach cmd $mptcl_exe {
+	    puts "$cmd $arglst"
 	    if {![catch {open "|$cmd $arglst 2>@1" r+} fd]} {
 		# mplayer started...
 		set data(fid) $fd
