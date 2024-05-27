@@ -6,3 +6,7 @@
 !xscreensaver.Dialog.buttonFont:         -*-dejavu sans-bold-r-*-*-10-*-*-*-*-*-*-*
 !xscreensaver.Dialog.dateFont:           -*-dejavu sans-medium-r-*-*-10-*-*-*-*-*-*-*
 !xscreensaver.passwd.passwdFont:         -*-dejavu sans-bold-r-*-*-11-*-*-*-*-*-*-*
+
+Xcursor.theme: Adwaita
+Xcursor.size: 44
+Xft.dpi: 120
