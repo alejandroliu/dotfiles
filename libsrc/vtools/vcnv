@@ -117,25 +117,36 @@ opt_do_abr() {
   FFMPEG_OPTS+=( -b:a $abr )
 }
 
-define_val vcodec 'libx264' "codec : video codec"
-#~ define_val vcodec 'hevc' "codec : video codec"
-opt_do_vcodec() {
-  FFMPEG_OPTS+=( -c:v $vcodec )
-}
 
+define_val vcodec 'libx264' "codec : video codec"
 define_val vopts \
   "-preset slow -crf 23 -profile:v high10 -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
   "flags : additional video flags"
 
+#~ define_val vcodec 'hevc' "codec : video codec"
 #~ define_val vopts \
-  #~ "-preset slow -crf 23 -profile:v baseline -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  #~ "-preset slow -crf 23 -profile:v main10 -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  #~ "flags : additional video flags"
+
+# https://trac.ffmpeg.org/wiki/Hardware/VAAPI
+#~ define_val vcodec 'h264_vaapi' "codec : video codec"
+
+#~ define_val vcodec 'hevc_vaapi' "codec : video codec"
+#~ define_val vopts \
+  #~ "-profile:v main10 -level 3.0 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
   #~ "flags : additional video flags"
 #~ define_val vopts \
-  #~ "-preset slow -crf 28 -movflags +faststart -tune zerolatency -flags +aic+mv4" \
+  #~ "-flags +aic+mv4" \
   #~ "flags : additional video flags"
+
+#~ define_val vcodec 'c:v av1_amf' "codec : video codec"
+opt_do_vcodec() {
+  FFMPEG_OPTS+=( -c:v $vcodec )
+}
 opt_do_vopts() {
   FFMPEG_OPTS+=( $vopts )
 }
+
 
 vfilters=''
 vfilters_q=''
@@ -331,6 +342,9 @@ transcode() (
   touch --reference="$ifile" "$ofile"
 )
 
+# vdpau cuda vaapi drm opencl vulkan
+#~ FFMPEG_CMD=( ffmpeg -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_device foo )
+#~ FFMPEG_CMD=( ffmpeg -init_hw_device vaapi=foo:/dev/dri/renderD128 -hwaccel vaapi -hwaccel_device foo )
 FFMPEG_CMD=( ffmpeg )
 FFMPEG_OPTS=()
 FFMPEG_TWEAK_OUT=()
