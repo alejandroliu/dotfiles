@@ -117,6 +117,8 @@ export LESS='-s -X -R'
 function tmux_agent() {
   [ -z "$TMUX" ] && return
 
+  ssh-add -l && return || echo "Add ssh-agent..." 1>&2
+
   # We only do this on a TMUX session
   if [ -f $HOME/.ssh-agent ] ; then
     (
