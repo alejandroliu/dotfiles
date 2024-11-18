@@ -71,10 +71,11 @@ git_local_user() {
     echo 'You must be a the root of a git repository when you run this command.'
     return 1
   fi
+  echo 'Currently configure user' 1>&2
   local yn
   for yn in user.name user.email
   do
-    git config --show-origin --get $yn
+    git config --show-origin --get $yn 1>&2
   done
 
   echo -n 'Configure local $mode addresses? (y/N) ' 1>&2
