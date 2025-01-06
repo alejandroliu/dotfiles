@@ -30,7 +30,7 @@ if $query ; then
       continue
     fi
     if type mimeapps >/dev/null 2>&1 ; then
-      apps=$(mimeapps $mime)
+      apps=$(mimeapps $mime | xargs)
     else
       apps=''
     fi
