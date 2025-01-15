@@ -1,0 +1,5 @@
+[plugins]
+load_plugins = true
+custom_plugin_path = /home/alex/t/geany-plugins
+active_plugins = /usr/lib64/geany/addons.so;/home/alex/t/geany-plugins/ctrl_tab.so;/usr/lib64/geany/git-changebar.so;/usr/lib64/geany/htmlchars.so;/usr/lib64/geany/geanyminiscript.so;/usr/lib64/geany/pairtaghighlighter.so;/usr/lib64/geany/spellcheck.so;/usr/lib64/geany/splitwindow.so;/home/alex/t/geany-plugins/switch_document.so;/home/alex/t/geany-plugins/macrec.so;/usr/lib/geany/splitwindow.so;/usr/lib/geany/keyrecord.so;
+

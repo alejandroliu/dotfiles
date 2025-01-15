@@ -1,0 +1,54 @@
+#!/usr/bin/python3
+#
+# Used to modify session.conf so that only certain things are kept
+#
+import argparse
+import configparser
+
+
+def xtract_ini(args: argparse.Namespace) -> None:
+  ini1 = configparser.ConfigParser(interpolation=None)
+  ini1.read(args.input)
+  ini2 = configparser.ConfigParser(interpolation=None)
+  if ini1.has_section('plugins'):
+    ini2['plugins'] = ini1['plugins']
+
+  #
+  # Possibly, manipulate keys
+  #
+
+  ini2.write(open(args.output,'w'))
+
+def merge_ini(args: argparse.Namespace) -> None:
+  ini1 = configparser.ConfigParser(interpolation=None)
+  ini1.read(args.input)
+  ini2 = configparser.ConfigParser(interpolation=None)
+  ini2.read(args.output)
+
+  for sect in ini1.sections():
+    ini2[sect] = ini1[sect]
+
+  #
+  # Possibly, manipulate keys
+  #
+
+  ini2.write(open(args.output,'w'))
+
+
+
+def argparser():
+  cli = argparse.ArgumentParser()
+  cli.add_argument('mode', choices=['extract','merge'])
+  cli.add_argument('input', type=str)
+  cli.add_argument('output', type=str)
+  return cli
+
+if __name__ == '__main__':
+  cli = argparser()
+  args = cli.parse_args()
+  if args.mode == 'extract':
+    xtract_ini(args)
+  elif args.mode == 'merge':
+    merge_ini(args)
+
+

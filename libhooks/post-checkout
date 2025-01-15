@@ -3,9 +3,9 @@
 exec 1>&2
 #
 
-# Not needed
-# # Used to convert geany repository into geany.conf
-#
-# geany_base=config/geany/geany
-# [ ! -f $geany_base.conf ] && cp -av $geany_base.git $geany_base.conf
+(
+  # Used to convert session.git repository into session.conf
+  cd config/geany || exit 1
+  ./prepare merge session.git session.conf
+)
 
