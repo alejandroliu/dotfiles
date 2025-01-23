@@ -132,7 +132,10 @@ function tmux_agent() {
   . $HOME/.ssh-agent
 }
 
-[ -n "$TMUX" ]  && tmux_agent
+if [ -n "$TMUX" ] ; then
+  tmux_agent
+  export TERM=screen-16color
+fi
 
 
 # We do this last, to keep things cleaner
