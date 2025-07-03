@@ -117,3 +117,18 @@ git() {
   fi
   return $ret
 }
+
+dogrep() {
+  if [ -t 1 ] ; then
+    local color=always
+  else
+    local color=auto
+  fi
+  local command="$1" ; shift
+  command "$command" --color="$color" "$@"
+}
+alias grep="dogrep grep"
+alias fgrep="dogrep fgrep"
+alias egrep="dogrep egrep"
+
+
