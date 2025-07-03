@@ -14,5 +14,6 @@ alias pharx="phar extract -f"
 alias pharl="phar list -f"
 alias kj='exit'
 alias py='python3'
+alias jargs="xargs -d '\n'"
 
 alias qop=/usr/local/bin/op
