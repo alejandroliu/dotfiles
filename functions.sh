@@ -114,8 +114,28 @@ git() {
       return $ret
     fi
     echo "CLONED: $dir"
+    echo "- Run 'git_local_user' to set local user name"
   fi
   return $ret
+}
+
+claudeep() {
+  if [ -z "$DEEPSEEK_API_KEY" ] ; then
+    echo "Missing API key: DEEPSEEK_API_KEY"
+    return 1
+  fi
+  env \
+    ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
+    ANTHROPIC_API_KEY="${DEEPSEEK_API_KEY}" \
+    ANTHROPIC_MODEL="deepseek-chat" \
+    ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
+    ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
+    ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
+    ANTHROPIC_SMALL_FAST_MODEL="deepseek-chat" \
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
+    API_TIMEOUT_MS=600000 \
+    $HOME/.local/bin/claude \
+    --bare "$@"
 }
 
 dogrep() {
