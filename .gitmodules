@@ -1,6 +1,3 @@
-[submodule "libpkgs/ashlib"]
-	path = libpkgs/ashlib
-	url = https://github.com/TortugaLabs/ashlib.git
 [submodule "libpkgs/ecd"]
 	path = libpkgs/ecd
 	url = https://github.com/TortugaLabs/ecd.git

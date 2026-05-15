@@ -1,4 +1,0 @@
-#!/bin/sh
-
-pkgdir="$(readlink -f "$(dirname "$(readlink -f "$0")")/../libpkgs")"
-exec $pkgdir/ashlib/ashlib "$@"
