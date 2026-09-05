@@ -5,5 +5,4 @@
 # https://github.com/unixorn/git-extra-commands/blob/master/LICENSE
 #
 # Delete files from the repo that you've deleted with `rm` instead of `git rm`
-
-exec git rm "$(git ls-files -d)"
+git ls-files -d | xargs -d '\n' git rm
