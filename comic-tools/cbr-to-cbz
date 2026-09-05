@@ -1,0 +1,46 @@
+#!/bin/sh
+set -euf -o pipefail
+
+# Check if unrar and zip commands exist
+if ! command -v unrar >/dev/null 2>&1 || ! command -v zip >/dev/null 2>&1; then
+  echo "Error: Required tools 'unrar' and 'zip' are both needed." >&2
+  exit 1
+fi
+
+
+# Process all .cbr files in the current directory
+for cbr in "$@"; do
+  # Handle case where no .cbr files exist
+  [ -e "$cbr" ] || { echo "$cbr: not found." 1>&2 ; continue; }
+
+  # Get base filename without extension
+  base="${cbr%.cbr}"
+  cbz="${base}.cbz"
+
+  echo "Converting: $cbr -> $cbz" 1>&2
+
+  # Create temporary working directory
+  t=$(mktemp -d) ; trap "rm -f $t" EXIT
+
+  # Extract RAR contents silently into the temp folder
+  if unrar x -inul "$cbr" "$t/"; then
+    # Change into temp folder, zip contents, and return back
+    (
+      cbz=$(readlink -f "$cbz")
+      cd "$t" || exit 1
+      find . -type f | sort \
+	| xargs -d '\n' zip -q -9 "$cbz" 
+    )
+    
+    if [ -f "$cbz" ]; then
+      echo "Successfully created: $cbz" 1>&2
+    else
+      echo "Failed to create $cbz" >&2
+    fi
+  else
+    echo "Error extracting $cbr" >&2
+  fi
+
+  # Clean up temporary directory
+  rm -rf "$t"
+done

@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+'''Command-line tool to inspect and update ComicInfo.xml files using ebook-meta style flags.'''
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import zipfile
+
+import xml.etree.ElementTree as ET
+
+try:
+  from icecream import ic
+except ImportError:  # Graceful fallback if IceCream isn't installed.
+  ic = lambda *a: None if not a else (a[0] if len(a) == 1 else a)  # noqa
+
+def has_comic_info(cbz_path: str) -> bool:
+  '''Checks for ComicInfo.xml regardless of letter casing.'''
+  try:
+    with zipfile.ZipFile(cbz_path, 'r') as zf:
+      filenames = [name.lower() for name in zf.namelist()]
+      return 'comicinfo.xml' in filenames
+  except (zipfile.BadZipFile, FileNotFoundError):
+    return False
+
+def update_element(
+  root: ET.Element, tag_name: str, value: str|None
+) -> bool:
+  '''Updates an XML element's text content, or creates it if it does not exist.
+  
+  Returns True if changes were made, False otherwise.
+  '''
+  if value is None: return False
+
+  elem = root.find(tag_name)
+  if value == '':
+    if elem is None: return False
+    root.remove(elem)
+  else:
+    if elem is None:
+      elem = ET.SubElement(root, tag_name)
+    elif elem.text == value: return False # No changes needed
+    elem.text = value
+  return True
+
+def xml_root_to_dict(root: ET.Element) -> dict[str, str]:
+  '''Converts an ElementTree root element into a flat dictionary.
+  
+  Ignores empty elements or nested structures.
+  '''
+  metadata: dict[str, str] = {}
+  date = {'Year': 'XXXX', 'Month': 'XX', 'Day': 'XX' }
+  date_found = False
+  for child in root:
+    if child.tag and child.text and child.text.strip():
+      if child.tag in date:
+        value = child.text.strip()
+        if len(date[child.tag]) > len(value):
+          value = ('0' * (len(date[child.tag])-len(value))) + value
+        date[child.tag] = value
+        date_found = True
+      else:
+        metadata[child.tag] = child.text.strip()
+  if date_found: metadata['Date'] = '{Year}-{Month}-{Day}'.format(**date)
+
+  return metadata
+
+def process_date(root: ET.Element, date_str: str|None) -> None:
+  '''Parses a YYYY, YYYY-MM, or YYYY-MM-DD date string into Year, Month, and Day tags.'''
+  if date_str is None: return False
+
+  parts = date_str.split('-')
+  date_tags = ['Year', 'Month', 'Day']
+  updated = False
+
+  for tag, val in zip(date_tags, parts):
+    # Strip leading zeros to match ComicInfo schema conventions (e.g., '08' -> '8')
+    clean_val = val.lstrip('0') if val != '00' else '0'
+    if clean_val == 'XX' or clean_val == 'XXXX': clean_val = ''
+    if update_element(root, tag, clean_val): updated = True
+  return updated
+
+
+def build_parser() -> argparse.ArgumentParser:
+  '''Constructs and returns the argument parser for the CLI script.'''
+  parser = argparse.ArgumentParser(
+    description='Modify a ComicInfo.xml metadata file using ebook-meta-style flags.'
+  )
+  parser.add_argument('-f', '--format',
+      type=str,
+      choices=['xml', 'json', 'txt'],
+      default='txt',
+      help='Output mode format (txt, xml or json)',
+    )
+  parser.add_argument('file',
+      type=str,
+      nargs = '+',
+      help='Path to the ComicInfo.xml file'
+  )
+
+  parser.add_argument('-t', '--title',
+      type=str,
+      help='Set the title (Title)'
+  )
+  parser.add_argument( '-a', '--author',
+      action = 'append',
+      default = None,
+      type=str,
+      dest='author',
+      help='Set the writer/author (Writer)',
+  )
+  parser.add_argument('-s', '--series',
+      type=str, help='Set the series name (Series)'
+  )
+  parser.add_argument('-i','--index',
+      type=str,
+      dest='issue',
+      help='Set the issue number/index in series (Number)',
+  )
+  parser.add_argument('-p', '--publisher',
+      type=str,
+      help='Set the publisher (Publisher)'
+  )
+  parser.add_argument('-d', '--date',
+      type=str,
+      help='Set release date (Year/Month/Day). Accepts YYYY, YYYY-MM, or YYYY-MM-DD',
+  )
+  parser.add_argument('--tags',
+      type=str,
+      dest='genre',
+      help='Set genres/tags as a comma or pipe-separated list (Genre)',
+  )
+  parser.add_argument('-c', '--comments',
+      type=str,
+      dest='summary',
+      help='Set summary/description (Summary)',
+  )
+  return parser
+
+
+def main() -> None:
+  '''Main entrypoint to parse arguments and write changes to ComicInfo.xml.'''
+  parser = build_parser()
+  args = parser.parse_args()
+
+  field_mappings: dict[str, str|None] = {
+    'Title': args.title,
+    'Writer': None if args.author is None else '; '.join(args.author),
+    'Series': args.series,
+    'Number': args.issue,
+    'Publisher': args.publisher,
+    'Genre': args.genre,
+    'Summary': args.summary,
+  }
+  for k in field_mappings:
+    if isinstance(field_mappings[k],str):
+      field_mappings[k] = field_mappings[k].strip()
+    elif isinstance(field_mappings[k],list):
+      for i in range(len(field_mappings[k])):
+        if isinstance(field_mappings[k][i],str):
+          field_mappings[k][i] = field_mappings[k][i].strip()
+
+  for usrfile in args.file:
+    if os.path.isfile(usrfile):
+      if usrfile.lower().endswith('.xml'):
+        tree = ET.parse(usrfile)
+        root = tree.getroot()
+      elif usrfile.lower().endswith('.zip') or usrfile.lower().endswith('.cbz'):
+        # Run 'unzip -p archive.cbz ComicInfo.xml' to output content straight to stdout
+        result = subprocess.run(
+            ['unzip', '-p', usrfile, 'ComicInfo.xml'],
+            capture_output=True,
+            check=False,
+        )
+
+        if result.returncode == 0 and result.stdout.strip():
+          # Parse the stdout binary stream directly
+          root: ET.Element = ET.fromstring(result.stdout)
+          tree = ET.ElementTree(root)
+        else:
+          # ComicInfo.xml does not exist in the archive or unzip failed
+          sys.stderr.write(f'{usrfile}: No ComicInfo.xml in archive\n')
+          root = ET.Element('ComicInfo')
+          tree = ET.ElementTree(root)
+      else:
+        raise argparse.ArgumentTypeError(usrfile)
+    else:
+      if usrfile.lower().endswith('.xml'):
+        # Start with an empty XML file
+        root = ET.Element('ComicInfo')
+        tree = ET.ElementTree(root)
+      else:
+        raise FileNotFoundError(usrfile)
+      
+    updated = False
+    for xml_tag, value in field_mappings.items():
+      if update_element(root, xml_tag, value): updated = True
+
+    if process_date(root, args.date): updated = True
+    
+    if len(args.file) > 1: print(usrfile)
+    if updated: print('Updated output:')
+      
+    if args.format == 'xml':
+      tree.write(sys.stdout.buffer, encoding='utf-8', xml_declaration=True)
+    elif args.format == 'json':
+      print(json.dumps(xml_root_to_dict(root),indent=2))
+    else:
+      for k,v in xml_root_to_dict(root).items():
+        if '\n' not in v:
+          print(f'{k:10}: {v}')
+        else:
+          print(f'{k:10}:')
+          for i in v.split('\n'):
+            print(' '*5, i)
+      
+    if len(args.file) > 1: print() 
+
+    if updated:
+      ET.indent(tree, space='  ')
+        
+      if usrfile.lower().endswith('.xml'):
+        with open(usrfile, 'wb') as f:
+          tree.write(f, encoding='utf-8', xml_declaration=True)
+      elif usrfile.lower().endswith('.zip') or usrfile.lower().endswith('.cbz'):
+        if has_comic_info(usrfile):
+          subprocess.run(
+            ['zip', '-d', usrfile, 'ComicInfo.xml'],
+            check=True,
+          )
+        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+        with zipfile.ZipFile(usrfile, mode='a') as zf:
+          zf.writestr('ComicInfo.xml', xml_bytes)
+      sys.stderr.write(f'{usrfile}: updated\n')
+      
+    # ~ ic(updated)
+    # ~ ic(xml_root_to_dict(root))
+    
+
+
+
+  # ~ print(f'Updated metadata in {args.xml_file}')
+
+
+if __name__ == '__main__':
+  main()

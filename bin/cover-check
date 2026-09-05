@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+import sys
+import os
+import zipfile
+import xml.etree.ElementTree as ET
+
+try:
+  from icecream import ic
+except ImportError:  # Graceful fallback if IceCream isn't installed.
+  ic = lambda *a: None if not a else (a[0] if len(a) == 1 else a)  # noqa
+
+DEBUG = True if os.getenv('DEBUG',None) else False
+
+
+def verify_epub_has_cover(epub_path):
+  """
+  Checks if an EPUB file contains an officially designated cover image.
+  It reads the internal OPF package manifest to find the cover,
+  making it smart enough to recognize covers named 'title_page.png', etc.
+
+  Returns:
+      bool: True if a cover is found and exists, False otherwise.
+  """
+  if not os.path.exists(epub_path):
+    print(f"Error: File not found at '{epub_path}'")
+    return False
+
+  try:
+    with zipfile.ZipFile(epub_path, 'r') as zip_ref:
+      file_list = zip_ref.namelist()
+
+      # 1. Find the container.xml file to locate the main .opf file
+      container_path = "META-INF/container.xml"
+      if container_path not in file_list: return False
+
+      container_data = zip_ref.read(container_path)
+      root_container = ET.fromstring(container_data)
+
+      # Track down the main blueprint file (.opf)
+      ns_container = {'ns': 'urn:oasis:names:tc:opendocument:xmlns:container'}
+      rootfile_entry = root_container.find('.//ns:rootfile', ns_container)
+      if rootfile_entry is None:
+        return False
+
+      opf_rel_path = rootfile_entry.get('full-path')
+
+      # Verify the .opf file actually exists in the zip
+      if opf_rel_path not in file_list:
+        return False
+
+      # Get the internal folder directory where book assets live (e.g., "OEBPS/")
+      opf_dir = os.path.dirname(opf_rel_path)
+
+      # 2. Parse the .opf file to look for cover assignments
+      opf_data = zip_ref.read(opf_rel_path)
+      if DEBUG: print(opf_data.decode('UTF-8'))
+
+
+      root_opf = ET.fromstring(opf_data)
+
+      # FIX: Reverted to the absolute, correct official schemas required by standard XML parsing rules
+      ns_opf = {
+          # ~ 'opf': 'http://idpf.org',
+          # ~ 'dc': 'http://purl.org'
+          'opf': 'http://www.idpf.org/2007/opf',
+          '': 'http://www.idpf.org/2007/opf',       # <-- THIS maps the default root namespace!
+          'dc': 'http://purl.org/dc/elements/1.1/'  #
+      }
+
+      cover_item_id = None
+
+      # Method A: Look for standard EPUB 2/Calibre metadata cover tag (<meta name="cover" content="ID" />)
+      metadata = root_opf.find('.//opf:metadata', ns_opf)
+      if metadata is None:
+        metadata = root_opf.find('.//metadata') # Loose fallback for Leanpub/Calibre quirks
+
+      if metadata is not None:
+        # Look for meta tags inside the metadata block using the custom namespace
+        # We search matching both local names and fully expanded namespace tags
+        # ~ ic(metadata)
+        for meta in metadata.findall('.//opf:meta', ns_opf) + metadata.findall('.//meta'):
+          # ~ ic(meta)
+          if meta.get('name') == 'cover':
+            cover_item_id = meta.get('content')
+            # ~ ic(cover_item_id)
+            break
+
+      # Method B: Check EPUB 3 standard properties tag attribute inside the manifest items
+      manifest = root_opf.find('.//opf:manifest', ns_opf)
+      cover_href = None
+
+      if manifest is not None:
+        # ~ ic(manifest)
+        for item in manifest.findall('.//opf:item', ns_opf) + manifest.findall('.//item'):
+          # ~ ic(item)
+          # If EPUB 3 property flags it as a cover-image
+          if item.get('properties') == 'cover-image':
+            cover_href = item.get('href')
+            break
+          # Or if we found an ID from Method A, match it to get the file path
+          if cover_item_id:
+            if item.get('id') == cover_item_id or item.get('href') == cover_item_id:
+              cover_href = item.get('href')
+              # ~ ic(cover_href)
+              break
+
+      # Method C: Fallback check for standard filenames if no official metadata tags exist
+      if not cover_href:
+        for path in file_list:
+          lower_path = path.lower()
+          if 'cover.jpg' in lower_path or 'cover.jpeg' in lower_path or 'cover.png' in lower_path:
+            return True
+        return False
+
+      # 3. Reconstruct the full path to the image file and check if it exists in the archive
+      if opf_dir and not cover_href.startswith(opf_dir):
+          full_cover_zip_path = f"{opf_dir}/{cover_href}".replace("//", "/")
+      else:
+          full_cover_zip_path = cover_href
+
+      # Check both the exact path and a sanitized version (handling potential backslash issues)
+      normalized_path = full_cover_zip_path.replace("\\", "/")
+
+      if normalized_path in file_list or full_cover_zip_path in file_list:
+          return True
+
+      # Final sanity check: see if the filename portion matches anything in the archive
+      filename_only = os.path.basename(normalized_path)
+      for path in file_list:
+          if path.endswith(filename_only):
+              return True
+
+  except Exception as e:
+    print(f"Error reading EPUB: {e}")
+    return False
+
+  return False
+
+
+if __name__ == "__main__":
+  if len(sys.argv) < 2:
+    sys.stderr.write('Usage:\n'
+                    '  cover-check epub [epub2 ...]\n'
+                    )
+    exit(0)
+  rc = 1
+  for test_epub in sys.argv[1:]:
+    has_cover = verify_epub_has_cover(test_epub)
+    print(test_epub,has_cover)
+    if has_cover: rc = 0
+  exit(rc)
