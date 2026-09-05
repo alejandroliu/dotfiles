@@ -125,14 +125,16 @@ claudeep() {
     return 1
   fi
   env \
+    NODE_OPTIONS="--max-old-space-size=8192" \
     ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic" \
     ANTHROPIC_API_KEY="${DEEPSEEK_API_KEY}" \
-    ANTHROPIC_MODEL="deepseek-chat" \
-    ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-chat" \
-    ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-chat" \
-    ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-chat" \
-    ANTHROPIC_SMALL_FAST_MODEL="deepseek-chat" \
-    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
+    ANTHROPIC_MODEL="deepseek-v4-pro[1m]" \
+    ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]" \
+    ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]" \
+    ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash" \
+    ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4-flash" \
+    CLAUDE_CODE_SUBAGENT_MODEL="deepseek-v4-flash" \
+    CLAUDE_CODE_EFFORT_LEVEL=max \
     API_TIMEOUT_MS=600000 \
     $HOME/.local/bin/claude \
     --bare "$@"
